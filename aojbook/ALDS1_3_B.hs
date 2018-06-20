@@ -2,12 +2,9 @@ import Control.Monad
 
 main :: IO()
 main = do
-  [n, q] <- map read . words <$> getLine
-  ps <- replicateM n $ words <$> getLine :: IO [[String]]
-  mapM_ (\ls -> do
-            putStr (head ls)
-            putStr " ";
-            putStrLn (last ls)) $ solve ps q 0
+  [n, q] <- fmap (map read . words) getLine :: IO[Int]
+  ps <- replicateM n $ fmap words getLine :: IO [[String]]
+  mapM_ (putStrLn . unwords)  $ solve ps q 0
 
 solve :: [[String]] -> Int -> Int -> [[String]]
 solve [] _ _ = []
