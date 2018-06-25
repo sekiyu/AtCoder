@@ -3,7 +3,6 @@ import Data.List
 import qualified Data.Map as Map
 import Data.Maybe
 
---main :: IO()
 main = do
   n <- readLn :: IO Int
   ts <- replicateM n $ fmap (map read . words) getLine :: IO [[Int]]
