@@ -51,16 +51,11 @@ delete _ EmptyTree = EmptyTree
 delete key t@(Node v left right)
   | key < v = Node v (delete key left) right
   | key > v = Node v left (delete key right)
-  | otherwise = innerDelete key t
+  | key == v = innerDelete key t
     where
       innerDelete key (Node val EmptyTree EmptyTree) = EmptyTree
       innerDelete key (Node val ltree EmptyTree) = ltree
       innerDelete key (Node val EmptyTree rtree) = rtree
-      innerDelete key (Node val ltree rtree) = Node j (delete j ltree) rtree
+      innerDelete key (Node val ltree rtree) = Node j ltree (delete j rtree)
         where
-          j = jisetsu key t False
-          jisetsu key (Node x EmptyTree _) True = x
-          jisetsu key (Node x l r) False
-            | key < x = jisetsu key l False
-            | key > x = jisetsu key r False
-            | key == x = jisetsu key l True
+          j = head $ inorder rtree
