@@ -16,8 +16,8 @@ solve :: [Int] -> Int
 solve (a:[]) = 0
 solve (a:b:[]) = 0
 solve (a:b:c:[]) = a * b * c
-solve ms = minimum [(solve (take i ms)) + (solve (drop i ms)) + v i
-                    | i <- [1, (n - 1)], not (i == 2 && n == 4) ]
+solve ms = minimum [(solve (take i ms)) + (solve (drop (i - 1) ms)) + v i
+                    | i <- [2..(n - 1)]]
   where
     n = length ms
-    v i = (head ms) * (last ms) * (ms !! (i))
+    v i = (head ms) * (last ms) * (ms !! (i - 1))
