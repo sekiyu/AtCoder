@@ -15,4 +15,8 @@ solve as (m:ms) = do
   solve as ms
     where
       innerSolve :: [Int] -> Int -> Bool
-      innerSolve as m = 0 < length [1 | is <- replicateM (length as) [0,1], (sum $ zipWith (*) is as) == m]
+      --innerSolve as m = 0 < length [1 | is <- replicateM (length as) [0,1], (sum $ zipWith (*) is as) == m]
+      --innerSolve as m = any (\switch -> (sum $ zipWith (*) switch as) == m) $ replicateM (length as) [0,1]
+      innerSolve _ 0 = True
+      innerSolve [] m = False
+      innerSolve (a:as) m = innerSolve as m || innerSolve as (m - a)
