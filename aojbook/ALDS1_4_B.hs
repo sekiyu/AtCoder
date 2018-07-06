@@ -1,18 +1,26 @@
 import Data.List
+import qualified Data.ByteString.Char8 as BC
+import Data.Maybe (fromJust)
+import Control.Monad
+import Data.Functor
+
+readInts :: IO [Int]
+readInts = map (fst . fromJust . BC.readInt) . BC.words <$> BC.getLine
 
 main :: IO()
 main = do
   _ <- fmap read getLine :: IO Int
-  ss <- fmap (map read . words) getLine :: IO [Int]
+  ss <- readInts
   _ <- fmap read getLine :: IO Int
-  ts <- fmap (map read . words) getLine :: IO [Int]
-  print $ solve ss ts 0
+  ts <- readInts
+  print . solve ss $ sort ts
 
-solve :: [Int] -> [Int] -> Int -> Int
+--solve :: [Int] -> [Int] -> Int
 --solve ss = foldl' (\acc t -> acc + binarySearch t ss 0 (length ss - 1)) 0
 --solve ss ts = length [1 | t <- ts, binarySearch t ss 0 (length ss - 1)]
-solve _ [] n = n
-solve ss (t:ts) n = solve ss ts $ n + if elem t ss then 1 else 0
+--solve _ [] n = n
+--solve ss (t:ts) n = solve ss ts $ n + if elem t ss then 1 else 0
+solve ss ts = length . filter (\t -> binarySearch t ss 0 (length ss - 1)) $ ts
 
 binarySearch :: Int -> [Int] -> Int -> Int -> Bool
 binarySearch t ss b e
