@@ -4,34 +4,33 @@ main :: IO ()
 main = do
   _ <- getLine
   as <- fmap (map read . words) getLine :: IO [Int]
-  solve' as
+  solve as 0
 
-solve' :: [Int] -> IO ()
-solve' as
-  | as == sort as = return ()
+solve :: [Int] -> Int -> IO ()
+solve as i
+  | length as == 1 = putStrLn . show . head $ as
+  | i == length as = return ()
   | otherwise = do
-      let bs = insertStep [] as
+      let bs = insertStep as i
       putStrLn . unwords . map show $ bs
-      solve' bs
+      solve bs (i + 1)
 
-insertStep :: [Int] -> [Int] -> [Int]
-insertStep [] (a:as) = insertStep [a] as
-insertStep bs [] = bs
-insertStep bs (a:as) = insertStep (insert a bs) as
+insertStep :: [Int] -> Int -> [Int]
+insertStep as i = (insert a (take i as)) ++ (drop (i + 1) as)
   where
+    a = as !! i
     insert a [] = [a]
     insert a (c:cs)
       | a < c = a:c:cs
       | otherwise = c:(insert a cs)
 
-solve :: [Int] -> [Int] -> IO ()
-solve as []
-  | as == sort as = return ()
-solve (a:b:as) passed
-  | a > b = do
-      putStrLn . unwords . map show $ b:a:as
-      solve d []
-  | otherwise = do
-      putStr $ show a ++ " "
-      solve (b:as) (passed ++ [a])
-    where d = passed ++ (b:a:as)
+
+insert' :: [Int] -> [Int] -> [Int]
+insert' [] (a:as) = insert' [a] as
+insert' bs [] = bs
+insert' bs (a:as) = insert' (insert a bs) as
+  where
+    insert a [] = [a]
+    insert a (c:cs)
+      | a < c = a:c:cs
+      | otherwise = c:(insert a cs)
