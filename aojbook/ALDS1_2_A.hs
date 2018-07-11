@@ -3,13 +3,12 @@
 main :: IO ()
 main = do
   _ <- getLine
-  as <- fmap (map read . words) getLine :: IO [Int]
-  solve as
+  fmap (map read . words) getLine :: IO [Int] >>= solve
 
-solve :: [Int] -> IO ()
+solve :: (Ord a) => [a] -> IO ()
 solve as = bubbleSort [] as 0
   where
-    bubbleSort :: [Int] -> [Int] -> Int -> IO()
+    bubbleSort :: (Ord a) => [a] -> [a] -> Int -> IO()
     bubbleSort sorted [] n = do
       putStrLn . unwords . map show . reverse $ sorted
       print n
