@@ -4,7 +4,10 @@ main :: IO ()
 main = do
   _ <- getLine
   as <- fmap (map read . words) getLine :: IO [Int]
-  solve as
+  let (sorted, n) = bubbleSortC as
+  putStrLn . unwords . map show $ sorted
+  print n
+  --solve as
 
 solve :: (Ord a, Show a) => [a] -> IO ()
 solve as = bubbleSort [] as 0
@@ -37,3 +40,20 @@ bubbleSort' as = reverse . bubble $ reverse as
     bubble (a:b:as)
       | a < b     = b:(bubble $ a:as)
       | otherwise = a:(bubble $ b:as)
+
+bubbleSortC :: (Ord a) => [a] -> ([a], Int)
+bubbleSortC [] = ([], 0)
+bubbleSortC as = cons' (x, i) $ bubbleSortC $ reverse xs
+  where
+    ((x:xs), i) = foldr bubble ([], 0) as
+
+    bubble :: (Ord a) => a -> ([a], Int) -> ([a], Int)
+    bubble x ([], i) = ([x], i)
+    bubble x ((a:as), i)
+      | a < x     = (a:x:as, i + 1)
+      | otherwise = (x:a:as, i)
+
+    cons' :: (Ord a) => (a, Int) -> ([a], Int) -> ([a], Int)
+    cons' a b = let (x, i) = a
+                    (xs, j) = b
+                in (x:xs, i + j)
