@@ -43,7 +43,7 @@ bubbleSort' as = reverse . bubble $ reverse as
 
 bubbleSortC :: (Ord a) => [a] -> ([a], Int)
 bubbleSortC [] = ([], 0)
-bubbleSortC as = cons' (x, i) $ bubbleSortC $ reverse xs
+bubbleSortC as = cons' (x, i) $ bubbleSortC $ xs
   where
     ((x:xs), i) = foldr bubble ([], 0) as
 
