@@ -21,7 +21,8 @@ solve as
   where
     (a:b:c:d:_) = as
     gcdbd = gcd b d
-    ow = all (\x -> (x + if x <= c then d else 0) >= b) $ [(a + x * gcdbd) `mod` b| x <- [0..(div b gcdbd)]]
+    --ow = all (\x -> (x + if x <= c then d else 0) >= b) $ [(a + x * gcdbd) `mod` b| x <- [0..(div b gcdbd)]]
+    ow = b - gcdbd + a `mod` gcdbd <= c
 
 gcd' :: (Integral a) => [a] -> a
 gcd' [] = 1
