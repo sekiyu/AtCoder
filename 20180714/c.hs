@@ -1,7 +1,6 @@
 import Control.Monad
 import qualified Data.Map.Strict as Map
---import Data.HashMap.Strict
-
+--import qualified Data.HashMap.Strict as Map
 
 main :: IO ()
 main = do
@@ -10,11 +9,13 @@ main = do
   print $ solve n as
 
 solve :: Int -> String -> Int
-solve n as = foldr
-  (\ptn acc -> acc + if elem ptn rptns then 1 else 0) 0 ptns
+solve n as = foldr (\k acc -> acc + calc k) 0 $ Map.keys lptns
   where
-    ptns = colorPatterns . take n $ as
-    rptns = colorPatterns . reverse $ drop n as
+    lptns = toMap . colorPatterns . take n $ as
+    rptns = toMap . colorPatterns . reverse $ drop n as
+    calc key = let l = Map.findWithDefault 0 key lptns
+                   r = Map.findWithDefault 0 key rptns
+               in l * r
 
 colorPatterns :: [a] -> [([a], [a])]
 colorPatterns xs = zip blues reds
@@ -32,9 +33,5 @@ subt (a:as) (b:bs)
   | a < b  = a:(subt as (b:bs))
   | a > b  = subt (a:as) bs
 
-include :: String -> String -> Bool
-include _ [] = True
-include [] _ = False
-include (a:as) (b:bs)
-  | a == b = include as bs
-  | otherwise = include as (b:bs)
+toMap :: (Ord k) => [k] -> Map.Map k Int
+toMap xs = Map.fromListWith (+) [(x, 1) | x <- xs]
