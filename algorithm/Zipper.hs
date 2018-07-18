@@ -1,10 +1,10 @@
+module Zipper where
 import Tree
-
-main :: IO ()
-main = print Tree.sampleTree
 
 data Crumb a = LeftCrumb a (Tree a)
   | RightCrumb a (Tree a) deriving (Show)
+
+type Zipper a = (Tree a, [Crumb a])
 
 goLeft :: (Tree a, [Crumb a]) -> (Tree a, [Crumb a])
 goLeft (Node x l r, crumbs) = (l, (LeftCrumb x r):crumbs)

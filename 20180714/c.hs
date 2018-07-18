@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns      #-}
 import Control.Monad
 import qualified Data.Map.Strict as Map
 --import qualified Data.HashMap.Strict as Map
@@ -9,13 +10,13 @@ main = do
   print $ solve n as
 
 solve :: Int -> String -> Int
-solve n as = foldr (\k acc -> acc + calc k) 0 $ Map.keys lptns
+solve n as = foldr (\k acc -> acc + count k) 0 $ Map.keys lptns
   where
-    lptns = toMap . colorPatterns . take n $ as
-    rptns = toMap . colorPatterns . reverse $ drop n as
-    calc key = let l = Map.findWithDefault 0 key lptns
-                   r = Map.findWithDefault 0 key rptns
-               in l * r
+    lptns = toCountMap . colorPatterns . take n $ as
+    rptns = toCountMap . colorPatterns . reverse $ drop n as
+    count key = let l = Map.findWithDefault 0 key lptns
+                    r = Map.findWithDefault 0 key rptns
+                in l * r
 
 colorPatterns :: [a] -> [([a], [a])]
 colorPatterns xs = zip blues reds
@@ -33,5 +34,5 @@ subt (a:as) (b:bs)
   | a < b  = a:(subt as (b:bs))
   | a > b  = subt (a:as) bs
 
-toMap :: (Ord k) => [k] -> Map.Map k Int
-toMap xs = Map.fromListWith (+) [(x, 1) | x <- xs]
+toCountMap :: (Ord k) => [k] -> Map.Map k Int
+toCountMap xs = Map.fromListWith (+) [(x, 1) | x <- xs]
