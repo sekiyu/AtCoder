@@ -2,6 +2,7 @@
 import Control.Monad
 import qualified Data.Map.Strict as Map
 --import qualified Data.HashMap.Strict as Map
+--import Data.List
 
 main :: IO ()
 main = do
@@ -23,6 +24,7 @@ colorPatterns xs = zip blues reds
   where
    n = length xs
    iss = filterM (\_ -> [True, False]) [0..(n - 1)]
+   --iss = subsequences [0..(n - 1)]
    blues = map (\is -> [ xs !! i| i <- is]) iss
    reds = map (\is -> [ xs !! i| i <- (subt [0..(n - 1)] is) ]) iss
 
