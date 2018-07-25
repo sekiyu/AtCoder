@@ -20,6 +20,9 @@ reachable vs a b al
   | otherwise = any (flip (reachable (b:vs) a) al) friendsOfB
     where friendsOfB = filter (`notElem` vs) $ getAdjs b al
 
+--多分anyの中で重複した探索をしてしまっている。
+--訪問済みリストの他に、訪問予定リストも持つようにする
+
 toAdjList :: [[Int]] -> AdjList
 toAdjList qs = insertAdj qs Map.empty
   where
