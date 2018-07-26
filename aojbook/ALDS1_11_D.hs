@@ -37,6 +37,9 @@ reachable' vs a (b:bs) al
     where
       friendsOfB = filter (`notElem` vs) $ getAdjs b al
 
+-- 事前に完全な隣接リスト(Adjacent List)を作っておく
+-- あるいは、探索した結果で隣接リストをオンラインで更新していけば速くなる？
+
 toAdjList :: [[Int]] -> AdjList
 toAdjList qs = insertAdj qs Map.empty
   where
