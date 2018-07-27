@@ -9,10 +9,14 @@ main = do
   gs <- replicateM m $ fmap (map read . words) getLine :: IO [[Int]]
   q <- readLn :: IO Int
   qs <- replicateM q $ fmap (map read . words) getLine :: IO [[Int]]
-
+  --let al = toCompAdjList . toAdjList $ gs
   let al = toAdjList gs
+  --print al
   putStr . unlines . map
+    --(\(a:b:_) -> if b `elem` (getAdjs a al) then "yes" else "no") $ qs
+
     (\(a:b:_) -> if reachable' [] a [b] al then "yes" else "no") $ qs
+
     --(\(a:b:_) -> if reachable [] a b al then "yes" else "no") $ qs
 
 type AdjList = Map.Map Int [Int]
@@ -50,6 +54,17 @@ toAdjList qs = insertAdj qs Map.empty
         (x:y:_) = g
         newal1 = Map.insertWith (++) x [y] al
         newal2 = Map.insertWith (++) y [x] newal1
+
+-- third submission WA@14
+toCompAdjList :: AdjList -> AdjList
+toCompAdjList al = foldr (\i acc -> complete i (getAdjs i acc) acc) al [0..Map.size al]
+  where
+    complete :: Int -> [Int] -> AdjList -> AdjList
+    complete _ [] al = al
+    complete i (s:ss) al = complete i (friends ++ ss) $ Map.adjust (friends ++) i al
+      where
+        friends = filter (`notElem` getAdjs i al) $ getAdjs s al
+
 
 getAdjs :: Int -> AdjList -> [Int]
 getAdjs i = Map.findWithDefault [] i
