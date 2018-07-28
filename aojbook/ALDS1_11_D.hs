@@ -9,14 +9,13 @@ main = do
   gs <- replicateM m $ fmap (map read . words) getLine :: IO [[Int]]
   q <- readLn :: IO Int
   qs <- replicateM q $ fmap (map read . words) getLine :: IO [[Int]]
+  --let al = toAdjList gs
   --let al = toCompAdjList . toAdjList $ gs
-  let al = toAdjList gs
-  --print al
+  let al = toGroups . toAdjList $ gs
   putStr . unlines . map
+    (\(a:b:_) -> if b `elem` (join [g | g <- al, a `elem` g]) then "yes" else "no") $ qs
     --(\(a:b:_) -> if b `elem` (getAdjs a al) then "yes" else "no") $ qs
-
-    (\(a:b:_) -> if reachable' [] a [b] al then "yes" else "no") $ qs
-
+    --(\(a:b:_) -> if reachable' [] a [b] al then "yes" else "no") $ qs
     --(\(a:b:_) -> if reachable [] a b al then "yes" else "no") $ qs
 
 type AdjList = Map.Map Int [Int]
@@ -64,6 +63,25 @@ toCompAdjList al = foldr (\i acc -> complete i (getAdjs i acc) acc) al [0..Map.s
     complete i (s:ss) al = complete i (friends ++ ss) $ Map.adjust (friends ++) i al
       where
         friends = filter (`notElem` getAdjs i al) $ getAdjs s al
+
+-- グラフは相互に繋がっているので、全探索は不要
+-- 繋がり合うグループの数だけ探索すれば十分
+
+type Group = [Int]
+type Groups = [Group]
+toGroups :: AdjList -> Groups
+toGroups al = scanAll [0..(Map.size al - 1)] al
+  where
+    scanAll :: [Int] -> AdjList -> Groups
+    scanAll [] _ = []
+    scanAll (x:xs) al = let g = dfs [x] [] al
+                        in g:(scanAll [y | y <- xs, notElem y g] al)
+    dfs :: [Int] -> [Int] -> AdjList -> Group
+    dfs [] vs _  = vs
+    dfs (a:as) vs al = dfs (friends ++ as) (friends ++ vs) al
+      where
+        friends = getAdjs a al // vs
+        (//) xs ys = [x | x <- xs, x `notElem` ys]
 
 
 getAdjs :: Int -> AdjList -> [Int]
