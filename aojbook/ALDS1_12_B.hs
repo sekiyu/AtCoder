@@ -4,17 +4,18 @@ import           Data.List
 import qualified Data.Map.Strict as Map
 import           Debug.Trace
 
---main :: IO ()
+main :: IO ()
 main = do
   n <- readLn
   am <- replicateM n $ map read . words <$> getLine :: IO([[Int]])
-  --print $ toAdjList am
-  forM_ (Map.toList . solve . toAdjList $ am) (\(node, distance) -> putStrLn $ show node ++ " " ++ show distance)
+  forM_ (Map.toList . solve . toAdjList $ am)
+    (\(node, distance) -> putStrLn . unwords . map show $ [node, distance])
 
 type Node = Int
 type Weight = Int
 type AdjList = [Map.Map Node Weight]
-toAdjList :: [[Int]] -> [Map.Map Node Weight]
+
+toAdjList :: [[Int]] -> AdjList
 toAdjList [] = []
 toAdjList (a:as) = (adjacents a):(toAdjList as)
   where
@@ -24,9 +25,7 @@ toAdjList (a:as) = (adjacents a):(toAdjList as)
     toPair [] = []
     toPair (x:y:zs) = (x, y):toPair zs
 
-
 solve :: AdjList -> Map.Map Node Int
---solve _ = Map.fromList [(1,2), (3,4)]
 solve al = dijkstra al $ Map.singleton 0 0
   where
     dijkstra :: AdjList -> Map.Map Node Int -> Map.Map Node Int
