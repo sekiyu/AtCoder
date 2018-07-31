@@ -67,6 +67,7 @@ toCompAdjList al = foldr (\i acc -> complete i (getAdjs i acc) acc) al [0..Map.s
 -- グラフは相互に繋がっているので、全探索は不要
 -- 繋がり合うグループの数だけ探索すれば十分
 
+-- 4th submission TLE@21
 type Group = [Int]
 type Groups = [Group]
 toGroups :: AdjList -> Groups
@@ -75,13 +76,16 @@ toGroups al = scanAll [0..(Map.size al - 1)] al
     scanAll :: [Int] -> AdjList -> Groups
     scanAll [] _ = []
     scanAll (x:xs) al = let g = dfs [x] [] al
-                        in g:(scanAll [y | y <- xs, notElem y g] al)
+                        in g:(scanAll (xs // g) al)
     dfs :: [Int] -> [Int] -> AdjList -> Group
     dfs [] vs _  = vs
     dfs (a:as) vs al = dfs (friends ++ as) (friends ++ vs) al
       where
         friends = getAdjs a al // vs
-        (//) xs ys = [x | x <- xs, x `notElem` ys]
+    (//) xs ys = [x | x <- xs, x `notElem` ys]
+
+--toGMap Groups -> Map.Map Int Int
+--toGMap gs = foldr (\g acc -> Map.insert )
 
 
 getAdjs :: Int -> AdjList -> [Int]
