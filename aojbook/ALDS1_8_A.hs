@@ -1,4 +1,6 @@
+{-# LANGUAGE BangPatterns #-}
 import Control.Monad
+import Control.DeepSeq
 
 main :: IO()
 main = do
@@ -6,17 +8,14 @@ main = do
   cs <- replicateM n $ fmap words getLine :: IO [[String]]
   solve cs EmptyTree
 
-data Tree a = EmptyTree | Node a (Tree a) (Tree a) deriving (Show)
+data Tree a = EmptyTree | Node !a !(Tree a) !(Tree a) deriving (Show)
 
 solve :: [[String]] -> Tree Int -> IO()
 solve [] _ = return ()
-solve (c:cs) t
-  | command == "insert" = solve cs $ insertTree v t
+solve (c:cs) !t
+  | command == "insert" = solve cs $! insertTree v t
   | command == "print" = do
-      putStr " "
-      putStrLn . unwords . map show $ inorder t
-      putStr " "
-      putStrLn . unwords . map show $ preorder t
+      printTree t
       solve cs t
   where
     command = head c
@@ -24,10 +23,11 @@ solve (c:cs) t
 
 insertTree :: (Ord a) => a -> Tree a -> Tree a
 insertTree c EmptyTree = Node c EmptyTree EmptyTree
-insertTree c (Node v left right)
-  | c >= v = Node v left (insertTree c right)
-  | c < v = Node v (insertTree c left) right
-
+insertTree c !(Node v !left !right)
+  | c >= v = let !inserted = insertTree c right
+             in Node v left inserted
+  | c < v = let !inserted = (insertTree c left)
+            in Node v inserted right
 
 inorder :: Tree a -> [a]
 inorder EmptyTree = []
@@ -36,3 +36,10 @@ inorder (Node v left right) = (inorder left) ++ [v] ++ (inorder right)
 preorder :: Tree a -> [a]
 preorder EmptyTree = []
 preorder (Node v left right) = v:(preorder left) ++ (preorder right)
+
+printTree :: Tree Int -> IO ()
+printTree t = do
+    putStr " "
+    putStrLn . unwords . map show $ inorder t
+    putStr " "
+    putStrLn . unwords . map show $ preorder t
