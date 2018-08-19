@@ -1,12 +1,30 @@
 {-# LANGUAGE BangPatterns #-}
 import Control.Monad
-import Control.DeepSeq
+-- import Control.DeepSeq
+import qualified Data.ByteString.Char8 as B
+import Data.Maybe (fromJust)
+import Data.Functor
 
 main :: IO()
 main = do
   n <- readLn :: IO Int
-  cs <- replicateM n $ fmap words getLine :: IO [[String]]
-  solve cs EmptyTree
+  -- cs <- replicateM n $ fmap words getLine :: IO [[String]]
+  -- solve cs EmptyTree
+
+  -- cs <- map B.words . B.lines <$> B.getContents :: IO [[B.ByteString]]
+  cs <- replicateM n $ B.words <$> B.getLine :: IO [[B.ByteString]]
+  solveBs cs EmptyTree
+
+solveBs :: [[B.ByteString]] -> Tree Int -> IO()
+solveBs [] _ = return ()
+solveBs (c:cs) t
+  | B.unpack command == "insert" = solveBs cs $! insertTree v t
+  | B.unpack command == "print" = do
+      printTree t
+      solveBs cs t
+    where
+      command = head c
+      v = fst . fromJust . B.readInt $ c !! 1 :: Int
 
 data Tree a = EmptyTree | Node !a !(Tree a) !(Tree a) deriving (Show)
 
