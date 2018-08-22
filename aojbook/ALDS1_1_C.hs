@@ -11,4 +11,4 @@ main = do
 isPrime :: Int -> Bool
 isPrime 1 = False
 isPrime 2 = True
-isPrime n = all (\i -> not $ n `mod` i == 0) [2..(1 + (truncate . sqrt $ fromIntegral n))]
+isPrime n = all (\i -> not $ n `mod` i == 0) (2:[3,5..(1 + (truncate . sqrt $ fromIntegral n))])
