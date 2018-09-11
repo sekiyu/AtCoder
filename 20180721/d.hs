@@ -1,11 +1,27 @@
 import Control.Monad
 import qualified Data.Map.Strict as Map
+import Data.List
+import qualified Data.ByteString.Char8 as B
+import Data.Maybe (fromJust)
+readInts = map (fst . fromJust . B.readInt) . B.words <$> B.getLine
 
 main :: IO ()
 main = do
   (n:m:_) <- fmap (map read . words) getLine :: IO [Int]
-  gs <- replicateM m $ fmap (map read . words) getLine :: IO [[Int]]
-  print . solve $ gs
+  -- gs <- replicateM m $ fmap (map read . words) getLine :: IO [[Int]]
+  gs <- replicateM m $ readInts
+  print . solve' 0 . sortBridge $ gs
+
+sortBridge = sortBy (\x y -> (x !! 1) `compare` (y !! 1))
+isDivided i ds = (ds !! 0) <= i && (ds !! 1) > i
+
+solve' :: Int -> [[Int]] -> Int
+solve' i [] = i
+solve' i gs = solve' (i + 1) $ filter (not . isDivided bridge) gs
+  where
+    bridge = (head gs) !! 1 - 1
+
+
 
 solve :: [[Int]] -> Int
 solve gs = breakBridge 0 . bridges $ gs
