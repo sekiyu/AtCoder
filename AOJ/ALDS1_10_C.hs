@@ -53,9 +53,9 @@ lcs' !x !y !table
 lcs'2 :: String -> String -> Int
 lcs'2 !x !y = lcs x y m n 0 IntMap.empty
   where
-    m = length x
-    n = length y
-    lcs !x !y !m !n i table
+    !m = length x
+    !n = length y
+    lcs !x !y !m !n i !table
       | i >= m * n = table IntMap.! (i - 1)
       | x !! j == y !! k = let !ii = i + 1
                            in lu `seq` lcs x y m n ii $! IntMap.insert i lu table

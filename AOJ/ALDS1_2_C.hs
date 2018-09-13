@@ -8,7 +8,7 @@ instance Show Trump where
 instance Eq Trump where
   Card a _ == Card b _ = a == b
 instance Ord Trump where
-  Card a _ `compare` Card b _ = a `compare` b
+  Card a _ `compare` Card b _ a= a `compare` b
 
 toTrump :: [String] -> [Trump]
 toTrump [] = []
