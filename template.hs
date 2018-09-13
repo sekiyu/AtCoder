@@ -7,6 +7,8 @@ main = do
   xs <- replicateM n getLine :: IO [String]
   ss <- fmap (map read . words) getLine :: IO [Int]
 
+  -- ps <- fmap join . replicateM n $ map read . words <$> getLine :: IO [Int]
+  ps <- replicateM n $ readLn :: IO [Int]
 
 
 main = getLine >>= putStrLn . solve . map read . words
