@@ -1,3 +1,4 @@
+-- ABC045 C Many Formulas
 import Data.Char
 
 main :: IO ()
