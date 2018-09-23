@@ -2,7 +2,6 @@
 import Control.Monad
 import qualified Data.Set as Set
 import Data.Array
-import qualified Data.Map.Strict as Map
 
 main :: IO ()
 main = do
@@ -16,7 +15,6 @@ type Position = (Int, Int)
 type Maze = Array Position Bool
 toMaze :: (Int, Int) -> [[Char]] -> Maze
 toMaze (n, m) = listArray ((1,1), (n,m)) . join . map (map (=='.'))
-
 
 solve :: Position -> Position -> Maze -> Int
 solve start goal maze = bfs (Set.singleton start) 0
