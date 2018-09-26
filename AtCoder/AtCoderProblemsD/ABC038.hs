@@ -1,16 +1,21 @@
 import Control.Monad
-import qualified Data.Set as Set
-import Data.Maybe
-import Debug.Trace
-import Data.List
 import qualified Data.Map.Strict as Map
+import Data.List
+import qualified Data.ByteString.Char8 as B
+import Data.Maybe (fromJust)
+readInt = fst . fromJust . B.readInt
+readInts = map (fst . fromJust . B.readInt) . B.words <$> B.getLine
 
 main :: IO ()
 main = do
   n <- readLn
-  am <- replicateM n $ map read . words <$> getLine :: IO [[Int]]
+  am <- replicateM n $ readInts
   -- print . naive . map toBox $ am
   print . solve . map toBox $ am
+
+type Box = (Int, Int)
+toBox :: [Int] -> Box
+toBox (a:b:_) = (a, b)
 
 solve :: [Box] -> Int
 solve boxes = dp (sort boxes) Map.empty
@@ -19,16 +24,23 @@ solve boxes = dp (sort boxes) Map.empty
     dp [] dps = maximum . Map.elems $ dps
     dp (b:bs) dps = dp bs newdps
       where
-        insides = Map.keys dps
-        newdps = dps
+        smallers = filter (`canBeIn` b) $ Map.keys dps
+        maxdp = maximum . map (dps Map.!) $ smallers
+        newdps = case smallers of
+          [] -> Map.insert b 1 dps
+          _  -> Map.insert b (1 + maxdp) dps
 
 
+
+canBeIn :: Box -> Box -> Bool
+a `canBeIn` b = aw < bw && ah < bh
+  where
+    (aw, ah) = a
+    (bw, bh) = b
+
+-- 全探索で解く
 naive :: [Box] -> Int
 naive boxes = maximum . map (pack []) . permutations $ boxes
-
-type Box = (Int, Int)
-toBox :: [Int] -> Box
-toBox (a:b:_) = (a, b)
 
 pack :: [Box] -> [Box] -> Int
 pack [] (b:bs) = pack [b] bs
@@ -36,9 +48,3 @@ pack as [] = length as
 pack (a:as) (b:bs) = if a `canBeIn` b
                      then pack (b:a:as) bs
                      else pack (a:as) bs
-
-canBeIn :: Box -> Box -> Bool
-a `canBeIn` b = aw < bw && ah < bh
-  where
-    (aw, ah) = a
-    (bw, bh) = b
