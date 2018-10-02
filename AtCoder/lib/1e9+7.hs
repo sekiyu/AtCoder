@@ -32,3 +32,9 @@ factorization x = let v = head $ factors x
 
 factors :: Integer -> [Integer]
 factors n = [x | x <- [2..n], n `mod` x == 0]
+
+-- リストの最大公約数
+listgcd :: (Integral a) => [a] -> a
+listgcd [] = 1
+listgcd [x] = x
+listgcd (x:xs) = gcd x (listgcd xs)
