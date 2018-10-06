@@ -1,0 +1,19 @@
+import Control.Monad
+import Data.Maybe
+import Debug.Trace
+import Data.List
+import qualified Data.Map.Strict as Map
+import qualified Data.IntMap.Strict as IntMap
+import qualified Data.Set as Set
+
+main :: IO ()
+main = do
+  n <- readLn
+  solve n
+
+solve :: Int -> IO ()
+solve 1 = putStrLn "Hello World"
+solve 2 = do
+  a <- readLn :: IO Int
+  b <- readLn :: IO Int
+  print $ a + b
