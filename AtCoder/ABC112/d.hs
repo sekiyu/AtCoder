@@ -1,3 +1,5 @@
+-- ABC112 D Partition
+
 main :: IO ()
 main = do
   (n:m:_) <- fmap (map read . words) getLine :: IO [Int]
