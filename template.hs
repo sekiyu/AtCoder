@@ -5,6 +5,7 @@ import Data.List
 import qualified Data.Map.Strict as Map
 import qualified Data.IntMap.Strict as IntMap
 import qualified Data.Set as Set
+import qualified Data.IntSet as IntSet
 
 main :: IO ()
 main = do
