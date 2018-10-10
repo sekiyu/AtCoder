@@ -19,10 +19,10 @@ powerset xs = filterM (\x -> [True, False]) xs
 
 
 {- 関数の合成の基本
-Prelude> let f = foldr (.) id [(+8), (*100), (+1)]
-Prelude> f 1
-208
-^}
+  Prelude> let f = foldr (.) id [(+8), (*100), (+1)]
+  Prelude> f 1
+  208
+-}
 -- リストを返す関数を合成して不確定計算
 inMany :: (Monad m) => (x -> m x) -> Int -> x -> m x
 inMany f n x = return x >>= foldr (<=<) return (replicate n f)
@@ -33,13 +33,13 @@ inMany f n x = return x >>= foldr (<=<) return (replicate n f)
 -- [14,12,12,10,12,10,10,8,12,10,10,8,10,8,8,6]
 
 {- モナド基本
-Prelude> let twice = (\x -> [x, x^2])
-Prelude> twice 3
-[3,9]
-Prelude> return 3 >>= twice
-[3,9]
-Prelude> return 3 >>= twice >>= twice
-[3,9,9,81]
+  Prelude> let twice = (\x -> [x, x^2])
+  Prelude> twice 3
+  [3,9]
+  Prelude> return 3 >>= twice
+  [3,9]
+  Prelude> return 3 >>= twice >>= twice
+  [3,9,9,81]
 -}
 
 
@@ -47,3 +47,12 @@ Prelude> return 3 >>= twice >>= twice
 toCountMap :: (Ord k) => [k] -> Map.Map k Int
 toCountMap xs = Map.fromListWith (+) $ zip xs (repeat 1)
 -- toCountMap xs = Map.fromListWith (+) [(x, 1) | x <- xs]
+
+comb n m = do
+  ns <- [1..n]
+  ms <- [1..m]
+  return (ns, ms)
+{-
+  *Main> comb 2 3
+  [(1,1),(1,2),(1,3),(2,1),(2,2),(2,3)]
+-}

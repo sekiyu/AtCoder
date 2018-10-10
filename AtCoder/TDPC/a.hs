@@ -1,3 +1,4 @@
+-- TDPC A - コンテスト
 import qualified Data.IntSet as IntSet
 
 main :: IO ()
