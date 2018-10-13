@@ -25,13 +25,43 @@ combination n c = foldl' moddiv (fact (n + c - 1) (c - 1)) [1..n]
 -- 素因数分解
 -- *Main> factorization 123456
 -- [2,2,2,2,2,2,3,643]
+-- 低速
 factorization :: Integer -> [Integer]
 factorization 1 = []
-factorization x = let v = head $ factors x
+factorization x = let v = head $ naiveFactors x
                   in  v : factorization (x `div` v)
+-- 高速
+primeFactors :: Integer -> [Integer]
+primeFactors n | n < 2 = []
+primeFactors n = go n [2,3,5]
+   where
+     go !n pps@(p:ps)
+       | n < p*p   = [n]
+       | r > 0     = go n ps
+       | otherwise = p:go q pps
+      where
+        (q,r) = quotRem n p
+     go n [] = [n]
 
-factors :: Integer -> [Integer]
-factors n = [x | x <- [2..n], n `mod` x == 0]
+-- 約数の列挙
+-- simple but slow
+naiveFactors :: Integer -> [Integer]
+naiveFactors n = [x | x <- [2..n], n `mod` x == 0]
+
+-- effective version
+factors :: (Integral a) => a -> [a]
+factors = Map.foldrWithKey (\k v acc -> products (powers k v) acc) [1] . toCountMap . primeFactors
+
+powers :: (Integral a) => a -> a -> [a]
+powers n m = [ n^i | i <- [0..m]]
+
+products :: (Num a) => [a] -> [a] -> [a]
+products xs ys = [ x*y | x <- xs, y <- ys]
+
+toCountMap :: (Ord k, Integral a) => [k] -> Map.Map k a
+toCountMap xs = Map.fromListWith (+) $ zip xs (repeat 1)
+
+
 
 -- リストの最大公約数
 listgcd :: (Integral a) => [a] -> a
