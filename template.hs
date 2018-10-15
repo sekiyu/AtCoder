@@ -24,7 +24,7 @@ solve :: [Int] -> String
 import qualified Data.ByteString.Char8 as B
 import Data.Maybe (fromJust)
 readInt = fst . fromJust . B.readInt
-readInts = map (fst . fromJust . B.readInt) . B.words <$> B.getLine
+readInts = map (fst . fromJust . B.readInt) . B.words <$> B.getLine :: IO [Int]
 read2dInts = map (map (fst . fromJust . B.readInt) . B.words) . B.lines <$> B.getContents
 
 

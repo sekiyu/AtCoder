@@ -6,22 +6,27 @@ import qualified Data.Map.Strict as Map
 import qualified Data.IntMap.Strict as IntMap
 import qualified Data.Set as Set
 import qualified Data.IntSet as IntSet
-import Data.Array
+import Data.Array.Unboxed
+import qualified Data.ByteString.Char8 as B
+import Data.Maybe (fromJust)
+readInt = fst . fromJust . B.readInt
+readInts = map (fst . fromJust . B.readInt) . B.words <$> B.getLine :: IO [Int]
 
 main :: IO ()
 main = do
   (a:b:_) <- fmap (map read . words) getLine :: IO [Int]
-  as <- fmap (map read . words) getLine :: IO [Int]
-  bs <- fmap (map read . words) getLine :: IO [Int]
+  as <- readInts
+  bs <- readInts
   print $ solve a b as bs
 
 solve :: Int -> Int -> [Int] -> [Int] -> Int
 solve a b as bs = dp!(0, 0)
   where
-    arraya = listArray (1, a) as :: Array Int Int
-    arrayb = listArray (1, b) bs
+    arraya = listArray (1, a) as :: UArray Int Int
+    arrayb = listArray (1, b) bs :: UArray Int Int
     -- dp!(i,j)はa_i+1, b_j+1以降のカードだけが残っているときの取り得る最大得点
-    dp = listArray ((0, 0), (a, b)) $ map f [ (x,y) | x <- [0..a], y <- [0..b]]
+    -- おそらく配列の再利用でメモリの節約が可能？
+    dp = listArray ((0, 0), (a, b)) $ map f [ (x,y) | x <- [0..a], y <- [0..b]] :: Array (Int, Int) Int
     f :: (Int, Int) -> Int
     f (i, j)
       | i == a && j == b = 0 -- nothing left
