@@ -12,20 +12,26 @@ main :: IO ()
 main = do
   k <- readLn :: IO Int
   rs <- replicateM (2^k) readLn :: IO [Int]
-  let dic = Map.fromListWith (+) . join $ solve k rs
-  forM_ rs (\r -> print $ dic Map.! r)
+  let rWithId = zip [1..] rs
+  let dic = Map.fromListWith (+) . join $ solve k rWithId
+  forM_ rWithId (\r -> print $ dic Map.! r)
 
-type Prob = (Int, Double)
-
-prob :: Prob -> Prob -> [Prob]
-prob (p, pp) (q, qp)
-  = let e = 1 / (1 + 10**(fromIntegral (q - p) / 400))
-    in [(p, pp * qp * e), (q, pp * qp * (1 - e))]
-
-solve k rs = foldr (.) id (replicate k proceed) $ initial
+solve k rs = foldr (.) id (replicate k (aggregate . proceed)) $ initial
   where
     initial = map (:[]) . zip rs $ repeat 1 :: [[Prob]]
+
+type Id = Int
+type Rating = Int
+type Prob = ((Id, Rating), Double)
+
+prob :: Prob -> Prob -> [Prob]
+prob ((i, p), pp) ((j, q), qp)
+  = let e = 1 / (1 + 10**(fromIntegral (q - p) / 400))
+    in [((i, p), pp * qp * e), ((j, q), pp * qp * (1 - e))]
 
 proceed :: [[Prob]] -> [[Prob]]
 proceed [] = []
 proceed (ps:qs:probs) = join [prob p q | p <- ps, q <- qs] : proceed probs
+
+aggregate :: [[Prob]] -> [[Prob]]
+aggregate = map (Map.toList . Map.fromListWith (+))
