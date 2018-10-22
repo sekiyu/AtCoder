@@ -1,6 +1,8 @@
 import Data.List
 
 divConst = 10^9 + 7 :: Integer
+modadd x y = (x + y) `mod` divConst
+modsub x y = (x - y) `mod` divConst
 modmul x y = ((x `mod` divConst) * (y `mod` divConst)) `mod` divConst
 moddiv x y = modmul x (power y (divConst - 2))
 power x y
