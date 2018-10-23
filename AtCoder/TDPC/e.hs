@@ -1,3 +1,4 @@
+-- TDPC E - 数
 import Data.Maybe
 import Debug.Trace
 import Data.List
@@ -8,13 +9,17 @@ main = do
   d <- readLn :: IO Int
   n <- readLn :: IO Integer
   print $ solveDp d n
+  -- print $ solve d n
 
 
--- solveDp :: Int -> Integer -> Integer
+solveDp :: Int -> Integer -> Integer
 solveDp d n = dp!(orgk, True, 0) - 1
   where
-    orgk = fromInteger . floor $ logBase 10 (fromIntegral n) :: Int
-    ds = listArray (0, orgk) . reverse $ digits n :: Array Int Int
+    -- This calculation fails when n is large.
+    -- orgk = fromInteger . floor $ logBase 10 (fromIntegral n) :: Int
+    dn = digits n
+    orgk = length dn - 1
+    ds = listArray (0, orgk) . reverse $ dn :: Array Int Int
     dp :: Array (Int, Bool, Int) Integer
     dp = listArray ((0, False, 0), (orgk, True, d - 1)) $ map f candidates
     candidates = do
@@ -39,10 +44,6 @@ solveDp d n = dp!(orgk, True, 0) - 1
 -- This is not efficient and too slow
 -- solve :: Int -> Int -> Int
 solve d n = length $ filter (\i -> (sum . digits $ i) `mod` d == 0) [2..n]
-
-str2digits :: String -> [Int]
-str2digits [] = []
-str2digits (s:ss) = (read [s]):str2digits ss
 
 digits :: Integer -> [Int]
 digits = reverse . go
