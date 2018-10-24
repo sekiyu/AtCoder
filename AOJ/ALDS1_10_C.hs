@@ -2,15 +2,52 @@
 import Control.Monad
 import qualified Data.ByteString.Char8  as B
 import qualified Data.IntMap.Strict     as IntMap
+import Data.Array.Unboxed
+import Data.Functor
 
 main :: IO ()
 main = do
   n <- readLn
-  -- xs <- replicateM (2 * n) getLine :: IO [String]
-  -- solve xs
+  replicateM n iterateSolveDp
+  return ()
+  --xs <- replicateM (2 * n) getLine :: IO [String]
+  -- solveDp xs
+  -- xs <- replicateM (2 * n) B.getLine :: IO [B.ByteString]
+  -- solveBs xs
 
-  xs <- replicateM (2 * n) B.getLine :: IO [B.ByteString]
-  solveBs xs
+iterateSolveDp = do
+  x <- B.unpack <$> B.getLine
+  y <- B.unpack <$> B.getLine
+  let n = length x
+      m = length y
+      a = listArray (0, n-1) x :: Array Int Char
+      b = listArray (0, m-1) y :: Array Int Char
+      dp :: Array (Int, Int) Int
+      dp = array ((0, 0), (n, m)) $ [((i, j), f (i, j)) |i<-[0..n],j<-[0..m]]
+      f (0, _) = 0
+      f (_, 0) = 0
+      f (i, j)
+        | a!(i-1) == b!(j-1) = 1 + dp!(i-1, j-1)
+        | otherwise = max (dp!(i, j-1)) (dp!(i-1, j))
+  print $ dp!(n, m)
+
+solveDp :: [String] -> IO ()
+solveDp [] = return ()
+solveDp (x:y:z) = do
+  let n = length x
+      m = length y
+      a = listArray (0, n-1) x :: Array Int Char
+      b = listArray (0, m-1) y :: Array Int Char
+      dp :: Array (Int, Int) Int
+      dp = listArray ((0, 0), (n, m)) $ map f [(i, j)|i<-[0..n],j<-[0..m]]
+      f (0, _) = 0
+      f (_, 0) = 0
+      f (i, j)
+        | a!(i-1) == b!(j-1) = 1 + dp!(i-1, j-1)
+        | otherwise = max (dp!(i, j-1)) (dp!(i-1, j))
+  print $ dp!(n, m)
+  solveDp z
+
 
 solveBs :: [B.ByteString] -> IO ()
 solveBs [] = return ()
