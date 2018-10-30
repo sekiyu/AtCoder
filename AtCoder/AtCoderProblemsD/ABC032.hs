@@ -3,8 +3,8 @@ import Control.Monad
 import Data.List
 import qualified Data.IntMap.Strict as M
 -- import qualified Data.Map.Strict as M
--- import Data.Array.Unboxed
-import Data.Array
+import Data.Array.Unboxed
+-- import Data.Array
 import Debug.Trace
 
 main :: IO ()
@@ -17,21 +17,22 @@ main = do
       f n mv mw
         | n <= 30 = print $ solveMapDp w vws
         | mw <= 1000 = print $ solveWeightDp w vws
-        | otherwise = print $ solveValueDp w vws
+        | mv <= 1000 = print $ solveValueDp w vws
+        | otherwise = print $ solveMapDp w vws
   -- f n maximumv maximumw
   print $ solveValueDp w vws
 
 
--- solveValueDp :: Int -> [(Int, Int)] -> Int
-solveValueDp maxw vws = snd . fst . last . sortOn snd . filter (\((_, v), w) -> w <= maxw) $ assocs dp
+solveValueDp :: Int -> [(Int, Int)] -> Int
+solveValueDp maxw vws = maximum . map (snd . fst) . filter (\((i, v), w) -> w <= maxw) $ assocs dp
   where
     n = length vws
-    maximumv = maximum . map fst $ vws
+    sumv = sum . map fst $ vws
     arrvws = listArray (1, n) vws :: Array Int (Int, Int)
     dp :: Array (Int, Int) Int
-    dp = listArray ((0, 0), (n, n * maximumv)) $ map f [(i, j) | i <- [0..n], j <- [0..(n * maximumv)]]
+    dp = listArray ((0, 0), (n, sumv)) $ map f [(i, j) | i <- [0..n], j <- [0..sumv]]
     f (0, 0) = 0
-    f (0, _) = maxBound
+    f (0, _) = maxBound `div` 2
     f (i, j)
       | j < v = dp!(i-1, j)
       | otherwise = min (dp!(i-1, j)) (dp!(i-1, j - v) + w)
