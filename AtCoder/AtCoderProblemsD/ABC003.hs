@@ -1,5 +1,6 @@
 -- ABC003 D AtCoder社の冬
 import Control.Monad
+import Data.List
 
 main :: IO ()
 main = do
@@ -9,20 +10,10 @@ main = do
   let movingPattern = (r - x + 1) `modmul` (c - y + 1)
   print $ movingPattern `modmul` (count x y d l)
 
-divConst = 10^9 + 7
+divConst = 10^9 + 7 :: Integer
 
-factorial n
-  | n <= 1 = 1
-  | otherwise = n `modmul` factorial (n - 1)
-invFactorial n
-  | n <= 1 = 1
-  | otherwise = (invFactorial (n - 1)) `moddiv` n
-
-count x y d l = ac `modmul` dc `modmul` lc `modmul` nc
+count x y d l = (foldl' moddiv (fact (x `modmul` y) d) [1..l]) `modmul` nc
   where
-    ac = factorial (x `modmul` y)
-    dc = invFactorial d
-    lc = invFactorial l
     nc = if (x * y) - d - l == 0
          then 1
          else countUnSatisfied x y d l
@@ -37,3 +28,5 @@ power x y
   | y == 1 = x `mod` divConst
   | y `mod` 2 == 0 = (power x (y `div` 2))^2 `mod` divConst
   | otherwise = (power x (y `div` 2))^2 * x `mod` divConst
+factorial n = foldr modmul 1 [1..n]
+fact n m = foldr modmul 1 [(m+1)..n]
