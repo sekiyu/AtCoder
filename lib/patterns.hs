@@ -48,12 +48,18 @@ toCountMap :: (Ord k) => [k] -> Map.Map k Int
 toCountMap xs = Map.fromListWith (+) $ zip xs (repeat 1)
 -- toCountMap xs = Map.fromListWith (+) [(x, 1) | x <- xs]
 
+-- Combination
+comb :: Int -> Int -> [(Int, Int)]
 comb n m = do
   ns <- [1..n]
   ms <- [1..m]
   return (ns, ms)
 -- *Main> comb 2 3
 -- [(1,1),(1,2),(1,3),(2,1),(2,2),(2,3)]
+
+-- Applicative style
+comb2 n m = (,) <$> [1..n] <*> [1..m]
+
 
 pascalTriangle n = do
   ns <- [1..n]
