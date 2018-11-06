@@ -7,8 +7,29 @@ main :: IO ()
 main = do
   n <- readLn
   cs <- join <$> (replicateM n $ map read . words <$> getLine) :: IO [Int]
-  print $ solve2 n cs
+  -- print $ solve2 n cs
+  print $ partial2 n cs
 
+
+partial1 :: Int -> [Int] -> Int
+partial1 n cs = n - (maximum . map length . filter validate . subsequences $ cs)
+  where
+    validate c = sort c == c
+
+partial2 :: Int -> [Int] -> Int
+partial2 n cs = n - (find [] cs)
+  where
+    find :: [(Int, Int)] -> [Int] -> Int
+    find bs [] = maximum . map snd $ bs
+    find [] (c:cs) = find [(c, 1)] cs
+    find bs (c:cs) = find ((minMax c bs):bs) cs
+
+    minMax c bs = go 0 c bs
+      where
+        go m _ [] = (c, m + 1)
+        go m c (b:bs)
+          | c > fst b = go (max m $ snd b) c bs
+          | otherwise = go m c bs
 
 solve2 :: Int -> [Int] -> Int
 solve2 n cs = fst $ foldl' f (0, 0) cs
