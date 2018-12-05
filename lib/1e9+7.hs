@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 import Data.List
 
 divConst = 10^9 + 7 :: Integer
