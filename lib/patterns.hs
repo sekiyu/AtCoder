@@ -17,6 +17,17 @@ import qualified Data.Map.Strict as Map
 powerset :: [a] -> [[a]]
 powerset xs = filterM (\x -> [True, False]) xs
 
+-- 連続部分列
+continuousSubsequences :: [a] -> [[a]]
+continuousSubsequences xs = do
+  let n = length xs
+  s <- [0..(n-1)]
+  c <- [1..(n-s)]
+  return . take c . drop s $ xs
+
+-- continuousSubsequences xs = [ (take j . drop i $ xs) | i <- [0..(n-1)], j <- [1..(n-i)]]
+--   where n = length xs
+  
 {- 関数の合成の基本
   Prelude> let f = foldr (.) id [(+8), (*100), (+1)]
   Prelude> f 1
@@ -66,8 +77,3 @@ pascalTriangle n = do
   return (ns, ms)
 -- *Main> pascalTriangle 4
 -- [(1,1),(2,1),(2,2),(3,1),(3,2),(3,3),(4,1),(4,2),(4,3),(4,4)]
-
--- 連続部分列
-continuousPartialSequence :: [a] -> [[a]]
-continuousPartialSequence xs = [ (take j . drop i $ xs) | i <- [0..(n-1)], j <- [1..(n-i)]]
-  where n = length xs
