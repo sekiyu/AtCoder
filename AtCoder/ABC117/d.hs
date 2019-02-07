@@ -8,12 +8,18 @@ import qualified Data.Set as Set
 import qualified Data.IntSet as IntSet
 import Data.Functor
 import Data.Array
+import Data.Bits
 
 main :: IO ()
 main = do
   (n:k:_) <- fmap (map read . words) getLine :: IO [Integer]
   as <- fmap (map read . words) getLine :: IO [Integer]
-  print $ solve' k as
+  print $ solve'' k as
+
+-- naive solution 
+solve'' k as = maximum $ map f [0..k]
+  where
+    f x = foldr (\a acc -> acc + (a `xor` x)) 0 as
 
 pad :: Int -> [Int] -> [Int]
 pad n ls = ls ++ (take (n - m) (repeat 0))
@@ -45,7 +51,6 @@ toRevBinary = go
       | i < 2  = [fromIntegral (i `mod` 2)]
       | otherwise = (fromIntegral (i `mod` 2)):(go $ i `div` 2)
       
-  {-
 solve k as = (count (m-1) True kbin . transpose . map (slice m) $ abins) + count1s m abins 
   where
     n = length as
@@ -78,5 +83,4 @@ slice n ls
   | m < n = (take (n - m) (repeat 0)) ++ ls
   | otherwise = drop (m - n) ls
   where m = length ls
--}
 
