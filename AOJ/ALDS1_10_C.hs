@@ -1,19 +1,92 @@
 {-# LANGUAGE BangPatterns #-}
 import Control.Monad
-import qualified Data.ByteString.Char8  as B
-import qualified Data.IntMap.Strict     as IntMap
 import Data.Array.Unboxed
 import Data.Functor
+import Data.List
+import qualified Data.ByteString.Char8  as B
+import qualified Data.IntMap.Strict     as IntMap
+import qualified Data.Vector.Unboxed    as VU
 
 main :: IO ()
 main = do
   n <- readLn
-  replicateM n iterateSolveDp
-  return ()
+  -- replicateM n iterateSolveDp
+  -- return ()
   --xs <- replicateM (2 * n) getLine :: IO [String]
   -- solveDp xs
   -- xs <- replicateM (2 * n) B.getLine :: IO [B.ByteString]
   -- solveBs xs
+  xs <- replicateM n get2Lines :: IO [(String, String)]
+  -- mapM_ (print . uncurry dpLCS) xs -- メモリ制限に引っかかっている
+  mapM_ (print . uncurry rowdp) xs -- メモリ制限にはかからないがTLE
+
+get2Lines :: IO (String, String)
+get2Lines = do
+  a <- getLine
+  b <- getLine
+  return (a, b)
+
+rowdp :: String -> String -> Int
+rowdp xs ys = (VU.foldl' scanY headRow xv)VU.!m
+  where
+    n = length xs
+    m = length ys
+    xv = VU.fromList xs :: VU.Vector Char
+    headRow = VU.replicate (m + 1) 0 :: VU.Vector Int
+    scanY :: VU.Vector Int -> Char -> VU.Vector Int
+    scanY prevRow x = VU.scanl' f 0 $ VU.fromList $ zip ys [1..]
+      where
+        f :: Int -> (Char, Int) -> Int
+        f v (y, i) 
+          | x == y = 1 + prevRow VU.! (i-1)
+          | otherwise = max (prevRow VU.! i) v
+
+    -- fはyのi文字目とxを比較してDPのi列目を作る
+    -- f :: VU.Vector Int -> Char -> VU.Vector
+    
+
+dpLCS :: String -> String -> Int
+dpLCS _ [] = 0
+dpLCS a b =
+  let nextRow ac prevRow =
+        let diagonals = 0:prevRow
+            lefts = 0:thisRow
+            ups = prevRow
+            maxes = zipWith max lefts ups
+            thisRow = zipWith3 (\diag maxLeftUp bc ->
+                                    if bc == ac then 1 + diag else maxLeftUp)
+                                    diagonals maxes b
+        in thisRow
+
+      firstRow = map (\_ -> 0) b
+      dpTable = firstRow:zipWith nextRow a dpTable
+  in last (last dpTable)
+  
+mydp :: String -> String -> Int
+mydp x y = dp!(n, m)
+  where
+    n = length x
+    m = length y
+    a = listArray (0, n-1) x :: Array Int Char
+    b = listArray (0, m-1) y :: Array Int Char
+    bounds = ((0, 0), (n, m)) -- dpをn x mの行列で行なっていることがメモリ不足の原因？
+    dp :: Array (Int, Int) Int
+    dp = listArray bounds [f ij | ij <- range bounds]
+    f (0, _) = 0
+    f (_, 0) = 0
+    f (i, j)
+      | a!(i-1) == b!(j-1) = 1 + dp!(i-1, j-1)
+      | otherwise = max (dp!(i, j-1)) (dp!(i-1, j))
+
+
+solveBs :: [B.ByteString] -> IO ()
+solveBs [] = return ()
+solveBs (x:y:z) = do
+  -- print $ lcs' (B.unpack x) (B.unpack y) []
+  -- print $ lcs'2 (B.unpack x) (B.unpack y)
+  print $ dpLCS (B.unpack x) (B.unpack y)
+  solveBs z
+  
 
 iterateSolveDp = do
   x <- B.unpack <$> B.getLine
@@ -30,6 +103,8 @@ iterateSolveDp = do
         | a!(i-1) == b!(j-1) = 1 + dp!(i-1, j-1)
         | otherwise = max (dp!(i, j-1)) (dp!(i-1, j))
   print $ dp!(n, m)
+
+  
 
 solveDp :: [String] -> IO ()
 solveDp [] = return ()
@@ -49,12 +124,6 @@ solveDp (x:y:z) = do
   solveDp z
 
 
-solveBs :: [B.ByteString] -> IO ()
-solveBs [] = return ()
-solveBs (x:y:z) = do
-  -- print $ lcs' (B.unpack x) (B.unpack y) []
-  print $ lcs'2 (B.unpack x) (B.unpack y)
-  solveBs z
 
 solve :: [String] -> IO ()
 solve [] = return ()
