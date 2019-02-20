@@ -10,15 +10,8 @@ import qualified Data.Vector.Unboxed    as VU
 main :: IO ()
 main = do
   n <- readLn
-  -- replicateM n iterateSolveDp
-  -- return ()
-  --xs <- replicateM (2 * n) getLine :: IO [String]
-  -- solveDp xs
-  -- xs <- replicateM (2 * n) B.getLine :: IO [B.ByteString]
-  -- solveBs xs
   xs <- replicateM n get2Lines :: IO [(String, String)]
-  -- mapM_ (print . uncurry dpLCS) xs -- メモリ制限に引っかかっている
-  mapM_ (print . uncurry rowdp) xs -- メモリ制限にはかからないがTLE
+  mapM_ (print . uncurry rowdp') xs 
 
 get2Lines :: IO (String, String)
 get2Lines = do
@@ -26,24 +19,67 @@ get2Lines = do
   b <- getLine
   return (a, b)
 
-rowdp :: String -> String -> Int
-rowdp xs ys = (VU.foldl' scanY headRow xv)VU.!m
+-- AOJではscanl'が使えない？
+rowdp' :: String -> String -> Int
+rowdp' xs ys = last $ foldl' scanY headRow xs
   where
-    n = length xs
     m = length ys
+    headRow = replicate (m + 1) 0 :: [Int]
+    scanY :: [Int] -> Char -> [Int]
+    scanY prevRow x = myscanl' f 0 yvprev
+      where
+        yvprev = zip3 ys prevRow $ tail prevRow
+        f :: Int -> (Char, Int, Int) -> Int
+        f v (y, a, b) = if x == y 
+                        then 1 + a
+                        else max b v
+
+myscanl'           :: (b -> a -> b) -> b -> [a] -> [b]
+myscanl' = scanlGo'
+  where
+    scanlGo'           :: (b -> a -> b) -> b -> [a] -> [b]
+    scanlGo' f !q ls    = q : (case ls of
+                            []   -> []
+                            x:xs -> scanlGo' f (f q x) xs)
+                        
+  -- メモリ制限にはかからないがTLE
+  -- replicateM n iterateSolveDp
+  -- return ()
+  --xs <- replicateM (2 * n) getLine :: IO [String]
+  -- solveDp xs
+  -- xs <- replicateM (2 * n) B.getLine :: IO [B.ByteString]
+  -- solveBs xs
+  -- mapM_ (print . uncurry dpLCS) xs -- メモリ制限に引っかかっている
+  
+
+rowdp :: String -> String -> Int
+rowdp !xs !ys = VU.last $ VU.foldl' scanY headRow xv
+  where
     xv = VU.fromList xs :: VU.Vector Char
+    m = length ys
     headRow = VU.replicate (m + 1) 0 :: VU.Vector Int
+    yvi = VU.fromList $ zip ys [1..]
     scanY :: VU.Vector Int -> Char -> VU.Vector Int
-    scanY prevRow x = VU.scanl' f 0 $ VU.fromList $ zip ys [1..]
+    scanY !prevRow !x = VU.scanl' f 0 yvi
       where
         f :: Int -> (Char, Int) -> Int
-        f v (y, i) 
-          | x == y = 1 + prevRow VU.! (i-1)
-          | otherwise = max (prevRow VU.! i) v
+        f !v !(y, i) = if x == y 
+                       then 1 + prevRow VU.! (i-1) 
+                       else max (prevRow VU.! i) v
 
-    -- fはyのi文字目とxを比較してDPのi列目を作る
-    -- f :: VU.Vector Int -> Char -> VU.Vector
-    
+
+{-
+    yv = VU.fromList ys
+    scanY :: VU.Vector Int -> Char -> VU.Vector Int
+    scanY !prevRow !x = VU.scanl' f 0 yvzip
+      where
+        yvzip = VU.zip3 yv prevRow $ VU.tail prevRow
+        f :: Int -> (Char, Int, Int) -> Int
+        f !v !(y, a, b) 
+          | x == y = 1 + a
+          | otherwise = max b v
+
+-}
 
 dpLCS :: String -> String -> Int
 dpLCS _ [] = 0

@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 import Control.Monad
 import Data.Maybe
 import Debug.Trace
@@ -13,11 +14,15 @@ main :: IO ()
 main = do
   n <- readLn
   am <- replicateM n $ map read . words <$> getLine :: IO [[Int]]
+  abs <- replicateM n $ (\(a:b:_) -> (a,b)) . map read . words <$> getLine :: IO [(Int, Int)]
   xs <- replicateM n getLine :: IO [String]
   ss <- fmap (map read . words) getLine :: IO [Int]
-
   -- ps <- fmap join . replicateM n $ map read . words <$> getLine :: IO [Int]
   ps <- replicateM n $ readLn :: IO [Int]
+
+  print $ solve ss
+  putStrLn . unwords . map show $ solve ss -- print list in 1 line
+  putStrLn . unlines . map show $ solve ss -- print list vertically
 
 
 main = getLine >>= putStrLn . solve . map read . words
