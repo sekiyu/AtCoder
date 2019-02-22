@@ -11,16 +11,76 @@ import Data.Foldable
 main :: IO()
 main = do
   n <- readLn :: IO Int
-  -- cs <- replicateM n $ fmap words getLine :: IO [[String]]
   -- cs <- replicateM n B.getLine :: IO [B.ByteString]
-  -- putStrLn . unwords . map show $ solve cs
   cs <- B.getContents :: IO B.ByteString
-  B.putStrLn . B.unwords $ solve'' cs
-
+  B.putStrLn . B.unwords $ solve''' cs
+ -- putStrLn . unwords . map show $ solve cs
+ 
 insertC = B.pack "insert"
 deleteC = B.pack "delete"
 deleteLastC = B.pack "deleteLast"
 deleteFirstC = B.pack "deleteFirst"
+
+data Dll a = Dll !Int [a] deriving (Show) 
+emptyDll :: Dll a
+emptyDll = Dll 0 []
+dllToList :: Dll a -> [a]
+dllToList (Dll n vs) = take n vs
+insertDll :: a -> Dll a -> Dll a
+insertDll !v (Dll n vs) = let newn = n + 1 in newn `seq` Dll newn (v:vs)
+deleteDll :: (Eq a) => a -> Dll a -> Dll a
+deleteDll !v (Dll n vs) = if Data.List.elem v validVs
+                          then Dll (n - 1) $ delete v validVs
+                          else Dll n validVs
+  where
+    validVs = take n vs
+    delete _ [] = []
+    delete !v (b:bcc) = if v == b
+                        then bcc
+                        else b:(delete v bcc)
+deleteLast :: Dll a -> Dll a
+deleteLast (Dll n vs) = let newn = n - 1 in newn `seq` Dll newn vs
+deleteFirst :: Dll a -> Dll a
+deleteFirst (Dll n vs) = let newn = n - 1 in newn `seq` Dll newn $ tail vs
+
+solve''' :: B.ByteString -> [B.ByteString]
+solve''' = dllToList . Data.Foldable.foldl' func emptyDll . B.lines
+  where
+    func :: Dll B.ByteString -> B.ByteString ->Dll B.ByteString
+    func acc cs
+      | command == insertC = {-# SCC insertDll #-} insertDll val acc
+      | command == deleteC = {-# SCC deleteDll #-} deleteDll val acc
+      | command == deleteLastC = {-# SCC deleteLastDll #-} deleteLast acc
+      | command == deleteFirstC = {-# SCC deleteFirstDll #-} deleteFirst acc
+        where
+          (command:c) = B.words cs
+          (val:_) = c
+          delete _ [] = []
+          delete !v (b:bcc) = if v == b
+                              then bcc
+                              else b:(delete v bcc)
+
+
+solve' :: B.ByteString -> [B.ByteString]
+solve' = foldl' func [] . B.lines
+  where
+    func :: [B.ByteString] -> B.ByteString -> [B.ByteString]
+    func acc cs
+      -- | command == insertC = val `seq` val:acc
+      | command == insertC = {-# SCC insert #-} val:acc
+      | command == deleteC = {-# SCC delete #-} delete val acc
+      | command == deleteLastC = {-# SCC deleteLast #-} init acc
+      | command == deleteFirstC = {-# SCC deleteFirst #-} tail acc
+      | otherwise = traceShow command []
+        where
+          (command:c) = B.words cs
+          -- val = fst . fromJust . B.readInt . head $ c
+          -- val = head $ c
+          (val:_) = c
+          delete _ [] = []
+          delete !v (b:bcc) = if v == b
+                              then bcc
+                              else b:(delete v bcc)
 
 solve'' :: B.ByteString -> [B.ByteString]
 solve'' = toList . foldl' func S.empty . B.lines
@@ -37,28 +97,8 @@ solve'' = toList . foldl' func S.empty . B.lines
           delete !v seq = left S.>< (S.deleteAt 0 right)
             where
               (left, right) = S.breakl (==v) seq
-
-solve' :: B.ByteString -> [B.ByteString]
-solve' = foldl' func [] . B.lines
-  where
-    func :: [B.ByteString] -> B.ByteString -> [B.ByteString]
-    func acc cs
-      -- | command == insertC = val `seq` val:acc
-      | command == insertC = val:acc
-      | command == deleteC = delete val acc
-      | command == deleteLastC = init acc
-      | command == deleteFirstC = tail acc
-      -- | otherwise = traceShow command []
-        where
-          (command:c) = B.words cs
-          -- val = fst . fromJust . B.readInt . head $ c
-          -- val = head $ c
-          (val:_) = c
-          delete _ [] = []
-          delete !v (b:bcc) = if v == b
-                              then bcc
-                              else b:(delete v bcc)
-  
+                              
+                              
 solve :: [[String]] -> [String]
 solve = foldl' func []
   where
