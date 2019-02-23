@@ -3,6 +3,7 @@ import qualified Data.ByteString.Char8 as BC
 import Data.Maybe (fromJust)
 import Control.Monad
 import Data.Functor
+import qualified Data.IntSet as IntSet
 
 readInts :: IO [Int]
 readInts = map (fst . fromJust . BC.readInt) . BC.words <$> BC.getLine
@@ -13,7 +14,13 @@ main = do
   ss <- readInts
   _ <- fmap read getLine :: IO Int
   ts <- readInts
-  print . solve ss $ sort ts
+  -- print . solve ss $ sort ts
+  print $ solve' ss ts
+
+solve' :: [Int] -> [Int] -> Int
+solve' ss ts = foldl' (\acc t -> acc + if IntSet.member t sSet then 1 else 0) 0 $ ts 
+  where
+    sSet = IntSet.fromList ss
 
 --solve :: [Int] -> [Int] -> Int
 --solve ss = foldl' (\acc t -> acc + binarySearch t ss 0 (length ss - 1)) 0
