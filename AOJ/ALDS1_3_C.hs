@@ -21,13 +21,18 @@ deleteC = B.pack "delete"
 deleteLastC = B.pack "deleteLast"
 deleteFirstC = B.pack "deleteFirst"
 
+-- Fake of Doubly Linked List 
 data Dll a = Dll !Int [a] deriving (Show) 
+
 emptyDll :: Dll a
 emptyDll = Dll 0 []
+
 dllToList :: Dll a -> [a]
 dllToList (Dll n vs) = take n vs
+
 insertDll :: a -> Dll a -> Dll a
 insertDll !v (Dll n vs) = let newn = n + 1 in newn `seq` Dll newn (v:vs)
+
 deleteDll :: (Eq a) => a -> Dll a -> Dll a
 deleteDll !v (Dll n vs) = if Data.List.elem v validVs
                           then Dll (n - 1) $ delete v validVs
@@ -38,8 +43,10 @@ deleteDll !v (Dll n vs) = if Data.List.elem v validVs
     delete !v (b:bcc) = if v == b
                         then bcc
                         else b:(delete v bcc)
+
 deleteLast :: Dll a -> Dll a
 deleteLast (Dll n vs) = let newn = n - 1 in newn `seq` Dll newn vs
+
 deleteFirst :: Dll a -> Dll a
 deleteFirst (Dll n vs) = let newn = n - 1 in newn `seq` Dll newn $ tail vs
 
@@ -55,10 +62,6 @@ solve''' = dllToList . Data.Foldable.foldl' func emptyDll . B.lines
         where
           (command:c) = B.words cs
           (val:_) = c
-          delete _ [] = []
-          delete !v (b:bcc) = if v == b
-                              then bcc
-                              else b:(delete v bcc)
 
 
 solve' :: B.ByteString -> [B.ByteString]
