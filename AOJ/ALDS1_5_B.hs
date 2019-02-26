@@ -11,13 +11,36 @@ main = do
   -- putStrLn . unwords . map show $ mergeSort as
   -- putStrLn . unwords . map show $ sort as
 
-  let (sorted, n) = runWriter $ mergeSortWithCount as
+  let (sorted, n) = runWriter $ mergeSortWithCount' as
   putStrLn . unwords . map show $ sorted
   print $ getSum n
   
--- solve :: [Int] -> Int
--- solve as = numCompMergeSort $ transpose [as]
 
+mergeSortWithCount' :: (Ord a) => [a] -> Writer (Sum Int) [a]
+mergeSortWithCount' (a:[]) = writer ([a], 0)
+mergeSortWithCount' as = (mergeSortWithCount' a) `mergeM'` (mergeSortWithCount' b)
+  where
+    m = (length as) `div` 2
+    (a, b) = splitAt m as 
+
+mergeM' :: (Ord a) => Writer (Sum Int) [a] -> Writer (Sum Int) [a] -> Writer (Sum Int) [a]
+mergeM' as bs = do
+  a <- as
+  b <- bs
+  mergeM a b
+  
+-- 引数のリスト2つはソート済みと想定
+mergeM :: (Ord a) => [a] -> [a] -> Writer (Sum Int) [a]
+mergeM [] bs = writer (bs, Sum (length bs))
+mergeM as [] = writer (as, Sum (length as))
+mergeM (a:as) (b:bs) = if a < b
+                       then mergeM as (b:bs) >>= (consCount a)
+                       else mergeM (a:as) bs >>= (consCount b)
+
+consCount :: a -> [a] -> Writer (Sum Int) [a]
+consCount a as = writer (a:as, 1)
+
+{-
 {-
 This algorithm is different from that of quasi-code in the problem.
 Therefore, the nnumber of comparison is not correct.
@@ -50,14 +73,6 @@ mergeSortWithCount as = fmap join $ return (transpose [as]) >>= foldr (<=<) retu
     
         
 
--- 引数のリスト2つはソート済みと想定
-mergeM :: (Ord a) => [a] -> [a] -> Writer (Sum Int) [a]
-mergeM [] bs = return bs
-mergeM as [] = return as -- writer (as, Sum (length as))
-mergeM (a:as) (b:bs) = if a < b
-                       then mergeM as (b:bs) >>= (consCount a)
-                       else mergeM (a:as) bs >>= (consCount b)
-
 merge :: (Ord a) => [a] -> [a] -> [a]
 merge [] bs = bs
 merge as [] = as
@@ -66,14 +81,14 @@ merge (a:as) (b:bs) = if a < b
                       else b:(merge (a:as) bs)
                        
 
-consCount :: a -> [a] -> Writer (Sum Int) [a]
-consCount a as = writer (a:as, 1)
 
 consNotCount :: a -> [a] -> Writer (Sum Int) [a]
 consNotCount a as = writer (a:as, 0)
 
 appendNotCount :: [a] -> [a] -> Writer (Sum Int) [a]
 appendNotCount as bs = writer (as ++ bs, 0)
+
+
 
 
 {-
@@ -96,4 +111,6 @@ merge [] bs = bs
 merge (a:as) (b:bs)
   | a <= b = a:(merge as (b:bs))
   | a > b  = b:(merge (a:as) bs)
+-}
+
 -}
