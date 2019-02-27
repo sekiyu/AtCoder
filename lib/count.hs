@@ -12,7 +12,6 @@ factmid n k = foldr (*) 1 [(k+1)..n]
 -- 順列 nPm
 permutation :: Int -> Int -> Int
 permutation n m = factmid n (n-m)
--- permutation n m = foldr (*) 1 . take m . reverse $ [1..n]
 
 -- 組み合わせ nCk
 combination :: Int -> Int -> Int
@@ -27,3 +26,10 @@ keta :: Int -> Int
 keta n = round . (logBase 10) . fromIntegral . head $ filter (> n) tens
 
 tens = map (10^) [0..]
+
+-- 2進数への変換
+intToBin :: Int -> [Int]
+intToBin = unfoldr (\x ->
+        if x == 0
+        then Nothing
+        else Just (mod x 2, div x 2))

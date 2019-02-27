@@ -32,5 +32,6 @@ dfs (s:ss) visiteds adjList
   | null unvisiteds = dfs ss (s:visiteds) adjList
   | otherwise = dfs ((head unvisiteds):s:ss) (s:visiteds) adjList
     where
-      edges = adjList IntMap.! s
-      unvisiteds = filter (\i -> not(i `elem` visiteds)) edges
+      -- edges = adjList IntMap.! s
+      -- unvisiteds = filter (\i -> not(i `elem` visiteds)) edges
+      unvisiteds = (adjList IntMap.! s) \\ visiteds
