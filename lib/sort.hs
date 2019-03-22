@@ -1,6 +1,9 @@
 import Data.List
 import Debug.Trace
 import Control.Monad
+import Control.Monad.ST
+import Data.Array.Unboxed
+import Data.Array.ST
 
 mergeSort :: (Ord a) => [a] -> [a]
 mergeSort (a:[]) = [a]
@@ -30,21 +33,35 @@ selectionSort = unfoldr f
     f as = let m = minimum as in Just (m, delete m as)
 
 bubbleSort :: (Ord a) => [a] -> [a]
-bubbleSort = bubble []
+bubbleSort = bubble False []
   where
-    bubble :: (Ord a) => [a] -> [a] -> [a]
-    bubble bs [] = reverse bs
-    bubble [] (a:as) = bubble [a] as
-    bubble (b:bs) (a:as) = if b > a 
-                           then bubble bs (a:b:as)
-                           else bubble (a:b:bs) as 
+    bubble :: (Ord a) => Bool -> [a] -> [a] -> [a]
+    bubble False bs [] = reverse bs
+    bubble True bs [] = bubble False [] $ reverse bs
+    bubble isSwapped [] (a:as) = bubble isSwapped [a] as
+    bubble isSwapped (b:bs) (a:as) = if b > a 
+                                     then bubble (True || isSwapped) (b:a:bs) as
+                                     else bubble (False || isSwapped) (a:b:bs) as 
+              
+gnomeSort :: (Ord a) => [a] -> [a]
+gnomeSort = gnome []
+  where
+    gnome :: (Ord a) => [a] -> [a] -> [a]
+    gnome bs [] = reverse bs
+    gnome [] (a:as) = gnome [a] as
+    gnome (b:bs) (a:as) = if b > a 
+                          then gnome bs (a:b:as)
+                          else gnome (a:b:bs) as 
                         
 insertSort :: (Ord a) => [a] -> [a]
 insertSort = foldr insert []
-  where
+{-  where
     insert :: (Ord a) => a -> [a] -> [a]
     insert k [] = [k]
-    insert k (a:as) = if k < a then k:a:as else a:(insert k as)
+    insert k (a:as) = if k < a 
+                      then k:a:as 
+                      else a:(insert k as)
+-} -- insertはData.Listに定義あり
 
 shellSort :: (Ord a) => [a] -> [a]
 shellSort = shell 4 -- 4 is currently a magic number 
@@ -59,4 +76,19 @@ shellSort = shell 4 -- 4 is currently a magic number
                then [as]
                else (take h as):(div h $ drop h as)
 
-main = print $ shellSort [3,2,9,6,7,4,1,5]
+countingSort :: (Int, Int) -> [Int] -> [Int]
+countingSort (s,e) as = concatMap (\i -> replicate (c ! i) i) [s..e]
+  where
+    c :: UArray Int Int
+    c = runSTUArray $ do
+      arr <- newArray (s,e) 0
+      forM_ as (\a -> do
+        val <- readArray arr a
+        writeArray arr a (val + 1) 
+        )
+      return arr
+               
+
+
+mainbs = print $ bubbleSort [3,2,9,6,7,4,1,5]
+mainis = print $ bubbleSort [3,2,9,6,7,4,1,5]

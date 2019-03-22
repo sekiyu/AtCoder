@@ -1,3 +1,5 @@
+import Data.List (unfoldr)
+
 -- skew heap
 data Tree a = Null | Fork a (Tree a) (Tree a) deriving (Show)
 
@@ -29,3 +31,12 @@ singleton a = Fork a Null Null
 
 fromList :: (Ord a) => [a] -> Tree a
 fromList = foldl (flip insert) Null
+
+heapSort :: (Ord a) => [a] -> [a]
+heapSort as = unfoldr f heap
+  where
+    heap = fromList as
+    f :: (Ord a) => Tree a -> Maybe (a, Tree a)
+    f h = if isEmpty h 
+          then Nothing
+          else Just (minElem h, deleteMin h)

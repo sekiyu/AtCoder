@@ -33,3 +33,15 @@ intToBin = unfoldr (\x ->
         if x == 0
         then Nothing
         else Just (mod x 2, div x 2))
+
+-- 2進数への変換(2)
+toBinary :: Int -> [Int]
+toBinary = reverse . go
+  where
+    go 0 = []
+    go !n = (n `mod` 2):(go (n `div` 2))
+
+
+toCountMap :: (Ord k) => [k] -> Map.Map k Int
+toCountMap = Map.fromListWith (+) . flip zip (repeat 1)
+        
