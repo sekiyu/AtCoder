@@ -17,7 +17,7 @@ main :: IO ()
 main = do
   n <- readLn :: IO Int
   ss <- fmap (map read . words) getLine :: IO [Int]
-  let ans = solve n ss
+  let ans = solve ss
   if isNothing ans
     then putStrLn "-1"
     else putStr . unlines . map show $ fromJust ans
@@ -26,9 +26,18 @@ main = do
   putStr . unlines . map show $ if null ans then [-1] else head ans
   -}
 
-solve :: Int -> [Int] -> Maybe [Int]
-solve n ss = dfs (vanishable ss) [] ss
+-- solve :: Int -> [Int] -> Maybe [Int]
+solve = go [] 
   where
+    go as [] = Just as
+    go as ss 
+      | null v = Nothing
+      | otherwise = go (s:as) $ unins s ss 
+      where
+        v = vanishable ss
+        s = last v
+
+    {-
     -- nexts = map fst . filter (\(i, j) -> i == j) $ zip ss [1..]
     dfs :: [Int] -> [Int] -> [Int] -> Maybe [Int]
     dfs _ visiteds [] = Just visiteds
@@ -41,6 +50,7 @@ solve n ss = dfs (vanishable ss) [] ss
       where
         removed = unins n ss
         nexts = vanishable removed
+    -}
 
 vanishable :: [Int] -> [Int] 
 vanishable ss = map fst . filter (\(i, j) -> i == j) $ zip ss [1..]
