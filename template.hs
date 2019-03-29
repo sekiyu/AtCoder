@@ -9,10 +9,13 @@ import qualified Data.Set as Set
 import qualified Data.IntSet as IntSet
 import Data.Functor
 import Data.Array
+-- import Data.Array.Unboxed
+import Control.Monad.ST
+import Data.Array.ST
 
 main :: IO ()
 main = do
-  n <- readLn
+  n <- readLn :: IO Int
   am <- replicateM n $ map read . words <$> getLine :: IO [[Int]]
   abs <- replicateM n $ (\(a:b:_) -> (a,b)) . map read . words <$> getLine :: IO [(Int, Int)]
   xs <- replicateM n getLine :: IO [String]
