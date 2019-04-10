@@ -20,6 +20,14 @@ lowerBound' predicate = last . unfoldr go
                   | otherwise   = m `seq` Just (0, (m, h))
       where m = (l + h) `div` 2
 
+upperBound :: (Int -> Bool) -> (Int, Int) -> Int
+upperBound predicate bounds = go bounds
+  where
+    go (l, h) | l + 1 == h = l
+              | predicate m = go (m, h)
+              | otherwise = go (l, m)
+      where m = (l + h) `div` 2
+
 -- predicate x == a を満たす要素xのインデックスを返す
 binarySearch :: (Ord a) => (Int -> a) -> a -> (Int, Int) -> Int
 binarySearch predicate a bounds = go bounds
@@ -28,3 +36,5 @@ binarySearch predicate a bounds = go bounds
               | predicate m < a  = go (l, m)
               | otherwise        = go (m, h)
       where m = (l + h) `div` 2
+
+
