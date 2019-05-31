@@ -44,4 +44,13 @@ toBinary = reverse . go
 
 toCountMap :: (Ord k) => [k] -> Map.Map k Int
 toCountMap = Map.fromListWith (+) . flip zip (repeat 1)
-        
+
+-- 数列が与えられたとき、その要素をいくつか選んで作られる和を取るの場合の数
+countSums as = foldl' f initial as
+  where
+    s = sum as
+    initial = listArray (0, s) $ map (\i -> if i == 0 then 1 else 0) [0..s]    
+    f :: Array Int Int -> Int -> Array Int Int
+    f prev a = listArray (0, s) $ map g [0..s]
+      where
+        g i = prev!i + if i < a then 0 else prev!(i - a)
