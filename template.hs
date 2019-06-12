@@ -19,7 +19,7 @@ main = do
   am <- replicateM n $ map read . words <$> getLine :: IO [[Int]]
   abs <- replicateM n $ (\(a:b:_) -> (a,b)) . map read . words <$> getLine :: IO [(Int, Int)]
   xs <- replicateM n getLine :: IO [String]
-  ss <- fmap (map read . words) getLine :: IO [Int]
+  ss <- map read . words <$> getLine :: IO [Int]
   -- ps <- fmap join . replicateM n $ map read . words <$> getLine :: IO [Int]
   ps <- replicateM n $ readLn :: IO [Int]
 
