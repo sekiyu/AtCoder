@@ -20,32 +20,29 @@ main = do
   ts <- map read . words <$> getLine :: IO [Int]
   print $ solve n m ss ts
 
-solve n m ss ts = traceShow dp $ sum . elems $ dp
+solve n m ss ts = sum . elems $ dp
   where
     s = listArray (1, n) ss
     t = listArray (1, m) ts
-    dp = listArray ((1, 1), (n, m)) $ [ f i j | i <- [1..n], j <- [1..m]]
+    dp = listArray ((0, 0), (n, m)) $ [ f i j | i <- [0..n], j <- [0..m]]
     sums = listArray ((0, 0), (n, m)) $ [ g i j | i <- [0..n], j <- [0..m]]
+    f 0 0 = 1
+    f 0 _ = 0
+    f _ 0 = 0
     f i j = if s!i == t!j 
       then sums!(i - 1, j - 1) `modadd` 1 
       else 0
-    g 0 0 = 1
+    g 0 0 = 0
     g 0 _ = 0
     g _ 0 = 0
-    g i j = (sums!(i-1, j)) `modadd` (sums!(i, j-1)) `modsub` (sums!(i-1, j-1)) `modadd` (dp!(i, j))
+    g i j = modadd (sums!(i-1, j)) . modadd (sums!(i, j-1)) $ (dp!(i, j)) `modsub` (sums!(i-1, j-1)) 
 
 
 divConst = 10^9 + 7 :: Integer
 modadd x y = (x + y) `mod` divConst
 modsub x y = (x - y) `mod` divConst
-modmul x y = ((x `mod` divConst) * (y `mod` divConst)) `mod` divConst
-moddiv x y = modmul x (power y (divConst - 2))
-power x y
-  | y == 0 = 1
-  | y == 1 = x `mod` divConst
-  | y `mod` 2 == 0 = (power x (y `div` 2))^2 `mod` divConst
-  | otherwise = (power x (y `div` 2))^2 * x `mod` divConst
-    
+
+
 
 rowdp :: String -> String -> Int
 rowdp xs ys = last $ foldl' scanY headRow xs
