@@ -1,5 +1,7 @@
 {-# LANGUAGE BangPatterns #-}
 import Data.List
+import qualified Data.Map.Strict as Map
+
 
 divConst = 10^9 + 7 :: Integer
 modadd x y = (x + y) `mod` divConst
@@ -19,6 +21,12 @@ factorial n = foldr modmul 1 [1..n]
 -- n! / m!
 fact :: Integer -> Integer -> Integer
 fact n m = foldr modmul 1 [(m+1)..n]
+
+
+-- nCk = n! / (k! * (n - k)!)
+-- n個からk個えらぶ
+select :: Integer -> Integer -> Integer
+select n k = foldl' moddiv (fact n (n - k)) [1..k]
 
 -- 組み合わせ nHc = (n + c - 1)!/(n! * (c - 1)!)
 -- n個のボールとc枚の仕切り板
@@ -54,7 +62,7 @@ naiveFactors :: Integer -> [Integer]
 naiveFactors n = [x | x <- [2..n], n `mod` x == 0]
 
 -- effective version
-factors :: (Integral a) => a -> [a]
+--factors :: (Integral a) => a -> [a]
 factors = Map.foldrWithKey (\k v acc -> products (powers k v) acc) [1] . toCountMap . primeFactors
 
 powers :: (Integral a) => a -> a -> [a]
