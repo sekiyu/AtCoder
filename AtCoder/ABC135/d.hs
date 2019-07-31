@@ -13,16 +13,18 @@ import Data.Array.Unboxed
 import Control.Monad.ST
 import Data.Array.ST
 import Data.Char
+import qualified Data.ByteString.Char8 as B
+import Data.Maybe (fromJust)
 
 main :: IO ()
-main = getLine >>= print . solve
+main = B.getLine >>= print . solve . B.unpack
 
 solve = (!5) . foldl' f initial . zip [0..] . reverse 
   where
     initial = listArray (0, 12) $ 1:replicate 12 0
-    f :: Array Int Int -> (Int, Char) -> Array Int Int
-    f prev (i, c)
-      | c == '?'  = runSTArray $ do
+    f :: UArray Int Int -> (Int, Char) -> UArray Int Int
+    f prev !(!i, !c)
+      | c == '?'  = runSTUArray $ do
         arr <- newArray (0, 12) 0
         forM_ [0..9] $ \i -> do
           forM_ [0..12] $ \j -> do
