@@ -12,6 +12,8 @@ import Data.Array
 -- import Data.Array.Unboxed
 import Control.Monad.ST
 import Data.Array.ST
+import Data.Char
+
 
 main :: IO ()
 main = do
@@ -34,10 +36,11 @@ solve :: [Int] -> String
 import qualified Data.ByteString.Char8 as B
 import Data.Maybe (fromJust)
 readInt = fst . fromJust . B.readInt
-readInts = map (fst . fromJust . B.readInt) . B.words <$> B.getLine :: IO [Int]
+readInts = map readInt . B.words <$> B.getLine :: IO [Int]
 readIntegers = map (fst . fromJust . B.readInteger) . B.words <$> B.getLine :: IO [Integer]
 read2dInts = map (map (fst . fromJust . B.readInt) . B.words) . B.lines <$> B.getContents
-
+readVInts = map (fst . fromJust . B.readInt) . B.lines <$> B.getContents
+readVTuple = map ((\(a:b:_) -> (a,b)) . map (fst . fromJust . B.readInt) . B.words) . B.lines <$> B.getContents :: IO [(Int, Int)] 
 
 import qualified Data.ByteString.Char8 as B
 main = B.getContents >>= print . B.count '\n'

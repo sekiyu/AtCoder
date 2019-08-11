@@ -2,10 +2,13 @@ import Data.List (unfoldr, foldl')
 
 -- skew heap
 data Heap a = Heap (a -> a -> Ordering) (Tree a)
-data Tree a = Null | Fork a (Tree a) (Tree a) deriving (Show)
+data Tree a = Null | Fork !a (Tree a) (Tree a) deriving (Show)
 
 instance (Show a) => Show (Heap a) where
   show (Heap _ a) = show a
+
+empty :: (a -> a -> Ordering) -> Heap a
+empty pred = Heap pred Null
 
 isEmpty :: Heap a -> Bool
 isEmpty (Heap _ Null) = True
@@ -20,24 +23,24 @@ rootNode (Fork x _ _) = x
 removeRoot :: Heap a -> Heap a
 removeRoot (Heap c (Fork _ a b)) = Heap c $ merge c a b
 
-insert :: a -> Heap a -> Heap a
-insert x (Heap c t) = Heap c $ merge c (singleton x) t
+insertHeap :: a -> Heap a -> Heap a
+insertHeap !x (Heap c t) = Heap c $ merge c (singleton x) t
 
 merge :: (a -> a -> Ordering) -> Tree a -> Tree a -> Tree a
 merge _ a Null = a
 merge _ Null b = b
 merge c a b
-  | c (rootNode a) (rootNode b) == LT = join c a b
-  | otherwise = join c b a
+  | c (rootNode a) (rootNode b) == LT = joinHeap c a b
+  | otherwise = joinHeap c b a
 
-join :: (a -> a -> Ordering) -> Tree a -> Tree a -> Tree a
-join c (Fork x l r) a = Fork x r (merge c l a)
+joinHeap :: (a -> a -> Ordering) -> Tree a -> Tree a -> Tree a
+joinHeap c (Fork x l r) a = Fork x r (merge c l a)
 
 singleton :: a -> Tree a
 singleton a = Fork a Null Null
 
 fromList :: (a -> a -> Ordering) -> [a] -> Heap a
-fromList c = foldl' (flip insert) (Heap c Null)
+fromList c = foldl' (flip insertHeap) (Heap c Null)
 
 
 ------- EXAMPLE 1 -----
