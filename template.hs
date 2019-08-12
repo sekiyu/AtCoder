@@ -41,6 +41,7 @@ readIntegers = map (fst . fromJust . B.readInteger) . B.words <$> B.getLine :: I
 read2dInts = map (map (fst . fromJust . B.readInt) . B.words) . B.lines <$> B.getContents
 readVInts = map (fst . fromJust . B.readInt) . B.lines <$> B.getContents
 readVTuple = map ((\(a:b:_) -> (a,b)) . map (fst . fromJust . B.readInt) . B.words) . B.lines <$> B.getContents :: IO [(Int, Int)] 
+readStrings = map B.unpack <$> replicateM n B.getLine :: IO [String]
 
 import qualified Data.ByteString.Char8 as B
 main = B.getContents >>= print . B.count '\n'

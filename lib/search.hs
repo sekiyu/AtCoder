@@ -38,3 +38,20 @@ binarySearch predicate a bounds = go bounds
       where m = (l + h) `div` 2
 
 
+-- 引数のリストはソート済みと仮定
+replaceUpperBound :: (a -> Bool) -> a -> [a] -> [a]
+replaceUpperBound pred new (a:b:as) 
+  | pred a && not (pred b) = new:b:as
+  | not (pred a) = a:b:as
+  | otherwise = a:(replaceUpperBound pred new (b:as))
+replaceUpperBound pred new (a:[]) = if pred a then [new] else [a]
+replaceUpperBound _ _ [] = []
+  
+deleteUpperBound :: (Ord a) => (a -> Bool) -> [a] -> [a]
+deleteUpperBound pred (a:b:as)
+  | pred a && not (pred b) = b:as
+  | not (pred a) = a:b:as
+  | otherwise = a:(deleteUpperBound pred (b:as))
+deleteUpperBound pred (a:[]) = if pred a then [] else [a]
+deleteUpperBound pred [] = []
+      
