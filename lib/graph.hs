@@ -1,3 +1,4 @@
+
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE FlexibleContexts #-}
 
@@ -14,7 +15,14 @@ import Data.Functor
 import Data.Array.Unboxed
 import Control.Monad.ST
 import Data.Array.ST
+import qualified Data.ByteString.Char8 as B
+read2dInts = map (map (fst . fromJust . B.readInt) . B.words) . B.lines <$> B.getContents :: IO [[Int]]
 
+sampleGraph = t
+  where
+    f = addEdge (1, 2, 1) empty
+    s = addEdge (3, 2, 0) f
+    t = addEdge (1, 3, 2) s
 
 type Edge = (Int, Int, Int)
 type Edges = Set.Set Edge
@@ -34,11 +42,11 @@ weight (_, _, w) = w
 data Graph = Graph Int (Map.Map Int Edges)
   deriving (Show)
 
-empty :: Graph
-empty = Graph 0 Map.empty
+empty :: Int -> Graph
+empty v = Graph v Map.empty
 
 addEdge :: Edge -> Graph -> Graph
-addEdge edge (Graph v mp) = Graph (v + 1) $ 
+addEdge edge (Graph v mp) = Graph v $ 
   Map.insertWith Set.union (from edge) (Set.singleton edge) mp
 
 adj :: Int -> Graph -> Edges
@@ -52,73 +60,63 @@ vertices :: Graph -> Int
 vertices (Graph vv _) = vv
 
 -- fromInput :: [[from, to, weight]] -> Graph
-fromInput :: [[Int]] -> Graph
-fromInput = foldl' (\graph (a:b:c:_) -> addEdge (a, b, c) graph) empty 
+fromInput :: Int -> [[Int]] -> Graph
+fromInput v = foldl' (\graph (a:b:c:_) -> addEdge (a, b, c) graph) (empty v)
 
--- bellmanFord :: start -> Graph -> ShortestPaths or Nothing(Negative cycle exists)
--- bellmanFord :: Int -> Graph -> UArray Int Int
--- bellmanFord start graph = runSTUArray $ do
---   let v = vertices graph
---   dist <- newArray (1, v) (maxBound :: Int)
---   writeArray dist start 0
---   forM_ [1..v] $ \_ -> do
---     loopEdges (edges graph) dist
---   return dist
-
-
-bellmanFord :: Int -> Graph -> UArray Int Int -> UArray Int Int
-bellmanFord start graph initial = runSTUArray $ do
+bellmanFord :: Int -> Graph -> UArray Int Int
+bellmanFord start graph = runSTUArray $ do
   let v = vertices graph
-  -- dist <- newArray (1, v) (maxBound :: Int)
-  dist <- thaw initial
+  dist <- newArray (1, v) (inf :: Int)
+  -- dist <- thaw initial
   writeArray dist start 0
   forM_ [1..v] $ \_ -> do
-    loopEdges (edges graph) dist
+    forM_ (edges graph) (flip relaxEdge dist)
   return dist
-
-
-loopEdges :: (Foldable t, MArray a Int m) => t Edge -> a Int Int -> m (a Int Int)
-loopEdges es dist = do
-  forM_ es $ \e -> do
-    relaxEdge e dist
-  return dist
-
--- loopEdges' :: (IArray a1 Int, MArray a2 Int m, Foldable t) 
---   => t Edge -> a1 Int Int -> m (a2 Int Int)
--- loopEdges' es dist = do
---   prev <- thaw dist
---   forM_ es $ \e -> do
---     relaxEdge e prev
---   return prev
-  
 
 -- relaxEdge :: Edge -> UArray Int Int -> ST s (STUArray t Int Int)
 relaxEdge :: MArray a Int m => Edge -> a Int Int -> m (a Int Int)
 relaxEdge e dist = do
   f <- readArray dist $ from e
   t <- readArray dist $ to e
-  if f == maxBound
+  if f == inf
     then return ()
     else writeArray dist (to e) $ min (f + weight e) t
   return dist
 
-sampleGraph = t
-  where
-    f = addEdge (1, 2, 1) empty
-    s = addEdge (3, 2, 0) f
-    t = addEdge (1, 3, 2) s
+inf :: Int
+inf = 10^10
+
+detect :: Int -> Graph -> UArray Int Int -> UArray Int Int
+detect start graph initial = runSTUArray $ do
+  let v = vertices graph
+  -- dist <- newArray (1, v) (maxBound :: Int)
+  dist <- thaw initial
+  forM_ [1..v] $ \_ -> do
+    forM_ (edges graph) $ \e -> do
+        f <- readArray dist $ from e
+        t <- readArray dist $ to e
+        if (f /= inf) && (f + weight e < t)
+          then writeArray dist (to e) $ negate inf
+          else return () 
+        return dist
+  return dist
+
 
 -- ABC137 E - Coins Respawn
 main :: IO ()
 main = do
   (n:m:p:_) <- map read . words <$> getLine :: IO [Int]
-  abcs <- replicateM m $ map read . words <$> getLine :: IO [[Int]]
+  -- abcs <- replicateM m $ map read . words <$> getLine :: IO [[Int]]
+  abcs <- read2dInts
   print $ solve n m p abcs
     
-solve n m p abcs = if hasNegativeCycle then -1 else  max 0 . negate . (!n) $ dist
+solve n m p abcs = if hasEffectiveNegativeCycle then -1 else  max 0 . negate . (!n) $ dist
   where
-    graph = fromInput . map (\[a,b,c] -> [a,b,p-c] ) $ abcs
-    dist = bellmanFord 1 graph $ listArray (1, n) (replicate n maxBound) :: UArray Int Int
-    test = bellmanFord 1 graph dist
-    hasNegativeCycle = dist!n /= test!n
+    graph = fromInput n . map (\[a,b,c] -> [a,b,p-c] ) $ abcs
+    dist = bellmanFord 1 graph :: UArray Int Int
+    test = detect 1 graph dist
+    hasEffectiveNegativeCycle = test!n <= negate inf
+
+    -- test = bellmanFord 1 graph dist
+    -- hasNegativeCycle = dist!n /= test!n
     
