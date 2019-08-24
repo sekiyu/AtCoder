@@ -1,4 +1,4 @@
-{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE BangPatterns, FlexibleContexts #-}
 import Control.Monad
 import Data.Maybe
 import Debug.Trace
@@ -26,10 +26,10 @@ readVTuple = map ((\(a:b:_) -> (readInt a, readInt b)) . B.words) . B.lines <$> 
 main :: IO ()
 main = do
   (n:q:_) <- map read . words <$> getLine :: IO [Int]
-  -- abs <- replicateM (n - 1) $ (\(a:b:_) -> (a,b)) . map read . words <$> getLine :: IO [(Int, Int)]
-  -- pxs <- replicateM q $ (\(a:b:_) -> (a,b)) . map read . words <$> getLine :: IO [(Int, Int)]
-  buff <- readVTuple :: IO [(Int, Int)]
-  let (abs, pxs) = splitAt (n-1) buff
+  abs <- replicateM (n - 1) $ (\(a:b:_) -> (a,b)) . map read . words <$> getLine :: IO [(Int, Int)]
+  pxs <- replicateM q $ (\(a:b:_) -> (a,b)) . map read . words <$> getLine :: IO [(Int, Int)]
+  -- buff <- readVTuple :: IO [(Int, Int)]
+  -- let (abs, pxs) = splitAt (n-1) buff
   putStrLn . unwords . map show $ solve' n q abs pxs
 
 -- solve n q abs pxs = elems arr
@@ -58,14 +58,26 @@ solve' n q abs pxs = elems dfs
     dfs = runSTUArray $ do
       c <- newArray (1, n) 0 :: ST s (STUArray s Int Int)
       let 
-        loop current parent point c = do
+        loop current parent point = do
           let p = point + case (IntMap.lookup current countMap) of 
                 Nothing -> 0 
                 Just v -> v
           writeArray c current p
           forM_ (tree Map.! current) $ \next -> 
-            if next == parent then return c else loop next current p c
-          return c
+            if next == parent then return () else loop next current p
 
-      loop 1 0 0 c
+      loop 1 0 0
+      return c
+
+      -- let 
+      --   loop current parent point c = do
+      --     let p = point + case (IntMap.lookup current countMap) of 
+      --           Nothing -> 0 
+      --           Just v -> v
+      --     writeArray c current p
+      --     forM_ (tree Map.! current) $ \next -> 
+      --       if next == parent then return c else loop next current p c
+      --     return c
+
+      -- loop 1 0 0 c
         
