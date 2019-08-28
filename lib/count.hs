@@ -45,6 +45,16 @@ toBinary = reverse . go
 toCountMap :: (Ord k) => [k] -> Map.Map k Int
 toCountMap = Map.fromListWith (+) . flip zip (repeat 1)
 
+-- 上限と下限がわかっているときはArrayの方が速い
+toCountArray :: (Int, Int) -> [Int] -> UArray Int Int
+toCountArray (lower, upper) as = runSTUArray $ do
+  ca <- newArray (lower, upper) 0 :: ST s (STUArray s Int Int)
+  forM_ as $ \a -> do
+    prev <- readArray ca a
+    writeArray ca a $ prev + 1
+  return ca
+
+
 -- 数列が与えられたとき、その要素をいくつか選んで作られる和を取るの場合の数
 countSums as = foldl' f initial as
   where
