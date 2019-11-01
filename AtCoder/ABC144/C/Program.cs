@@ -1,5 +1,6 @@
 ﻿using System;
 
+// Walk on Multiplication Table
 namespace C
 {
     class Program
