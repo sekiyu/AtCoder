@@ -19,21 +19,39 @@ namespace E
                 return scores.Select(score => Math.Max(0, score.ai - x / score.fi)).Sum() <= k;
             };
 
-            Func<long, long, long> binarySearch = null;
-            binarySearch = (start, end) => {
-                if (start + 1 >= end)
-                {
-                    return pred(start)
-                    ? start
-                    : end;
-                }
-                var m = (start + end) / 2;
-                return pred(m)
-                    ? binarySearch(start, m)
-                    : binarySearch(m, end);
-            };
+            //Func<long, long, long> binarySearch = null;
+            //binarySearch = (start, end) => {
+            //    if (start + 1 >= end)
+            //    {
+            //        return pred(start)
+            //        ? start
+            //        : end;
+            //    }
+            //    var m = (start + end) / 2;
+            //    return pred(m)
+            //        ? binarySearch(start, m)
+            //        : binarySearch(m, end);
+            //};
 
-            return binarySearch(0, max);
+            //return binarySearch(0, max);
+
+            // another version of binary search
+            long start = -1; // absolutely NG value
+            long end = max; // absolutely OK value
+            while (Math.Abs(start - end) > 1)
+            {
+                long m = (start + end) / 2;
+                if (pred(m))
+                {
+                    end = m;
+                }
+                else
+                {
+                    start = m;
+                }
+            }
+            return end;
+
         }
 
 
